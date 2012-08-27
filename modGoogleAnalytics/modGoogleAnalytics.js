@@ -348,17 +348,19 @@ function GATrackingRequest(gaSession){
 	}
 }
 
-
 /**
  * Initializes the current session object for the running client instance
  * Attempts to load persistent session data from user properties. Resumes session if found.
  * @param {String} trackingCode
+ * @param {Boolean} [resumeFromUserProps] Attempts to resume session data from previous visits stored in user properties file
  * @see GASession.resume()
  * @properties={typeid:24,uuid:"95E85CFD-2BB1-45E9-A6FC-BE1C8D3E44D9"}
  */
-function initSession(trackingCode){
+function initSession(trackingCode, resumeFromUserProps){
+	
 	// TODO: Can be called more than once? Or implement something like session.destroy() to notify GA?
 	if(!trackingCode) throw 'Tracking code required'
+	
 	/**
 	 * @type {scopes.modGoogleAnalytics.GASession}
 	 */
@@ -366,19 +368,21 @@ function initSession(trackingCode){
 	
 	//	Attempt resume from user properties
 	//	TODO: Encrypt Tracking Code?
-	var tc =  application.getUserProperty('ga.trackingCode');
-	var hnh = application.getUserProperty('ga.hostNameHash');
-	var vid = application.getUserProperty('ga.visitorID');
-	var fv =  application.getUserProperty('ga.firstVisit');
-	var pv =  application.getUserProperty('ga.previousVisit');
-	var cv =  application.getUserProperty('ga.currentVisit');
-	var sc =  application.getUserProperty('ga.sessionCount');
-	if(tc == trackingCode && clientSession.hostNameHash == hnh &&  clientSession.visitorID == vid && fv && pv && cv && sc){
-		clientSession.firstVisit = fv;
-		clientSession.previousVisit= pv;
-		clientSession.currentVisit = cv;
-		clientSession.sessionCount = parseInt(sc,10);
-		clientSession.resume();
+	if(resumeFromUserProps){
+		var tc =  application.getUserProperty('ga.trackingCode');
+		var hnh = application.getUserProperty('ga.hostNameHash');
+		var vid = application.getUserProperty('ga.visitorID');
+		var fv =  application.getUserProperty('ga.firstVisit');
+		var pv =  application.getUserProperty('ga.previousVisit');
+		var cv =  application.getUserProperty('ga.currentVisit');
+		var sc =  application.getUserProperty('ga.sessionCount');
+		if(tc == trackingCode && clientSession.hostNameHash == hnh && clientSession.visitorID == vid && fv && pv && cv && sc){
+			clientSession.firstVisit = fv;
+			clientSession.previousVisit= pv;
+			clientSession.currentVisit = cv;
+			clientSession.sessionCount = parseInt(sc,10);
+			clientSession.resume();
+		}
 	}
 	
 	//	Store to client props
