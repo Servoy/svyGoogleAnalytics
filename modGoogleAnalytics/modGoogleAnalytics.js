@@ -379,8 +379,11 @@ function initSession(trackingCode){
 		clientSession.currentVisit = cv;
 		clientSession.sessionCount = parseInt(sc,10);
 		clientSession.resume();
-		persistClientSession();
 	}
+	
+	//	Store to client props
+	persistClientSession();
+	
 	return clientSession;
 }
 
