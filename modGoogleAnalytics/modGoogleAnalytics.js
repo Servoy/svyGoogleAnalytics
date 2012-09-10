@@ -23,14 +23,6 @@ var GA_REQUEST_TYPE_PAGE_VIEW = 'page';
 var GA_REQUEST_TYPE_EVENT = 'event';
 
 /**
- * ID of the client to use for dispatching remote http calls
- * @type {String}
- * @private 
- * @properties={typeid:35,uuid:"7575E947-C21A-4CDC-8E60-F19B28D5F7A3"}
- */
-var headlessClientID = null;
-
-/**
  * Instance of the current client session
  * @type {scopes.modGoogleAnalytics.GASession}
  * @private
@@ -116,8 +108,25 @@ function GASession(code){
 	 * @example 32
 	 * @type {String}
 	 */
-	this.colorDepth = Packages.java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode().getBitDepth();	//	TODO: Not Headless/WC compatible
-	
+	this.colorDepth = function(){
+		var retval = -1
+		switch (application.getApplicationType()) {
+			case APPLICATION_TYPES.WEB_CLIENT:
+				/** @type {Packages.org.apache.wicket.protocol.http.request.WebClientInfo}*/
+				var info = Packages.org.apache.wicket.RequestCycle.get().getClientInfo()
+				retval = info.getProperties().getScreenColorDepth()
+				break;
+			case  APPLICATION_TYPES.HEADLESS_CLIENT:
+				retval = 0
+			case APPLICATION_TYPES.SMART_CLIENT:
+			case APPLICATION_TYPES.RUNTIME_CLIENT:
+				retval = Packages.java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode().getBitDepth()
+			default:
+				break;
+		}
+		return retval.toFixed(0) + '-bit'
+	}()
+		
 	/**
 	 * Language of client
 	 * @example en-us
@@ -309,22 +318,26 @@ function GATrackingRequest(gaSession){
 	 * Returns the GA-formatted HTTP Parameter string for this request object. Includes session parameters as well.
 	 * @return {String}
 	 */
-	this.toHTTPQueryString = function(){
-		var props =  {
-			utmn:this.requestID,
-			utmdt:this.pageTitle,
-			utmhid:this.adSenseID,
-			utmr:this.referral,
-			utmp:this.pageRequest,
-			utmt:this.requestType
+	this.toHTTPQueryString = function() {
+		var props = {
+			utmn: 	this.requestID,
+			utmdt: 	this.pageTitle,
+			utmhid: this.adSenseID,
+			utmr: 	this.referral,
+			utmp: 	this.pageRequest,
+			utmt: 	this.requestType
 		};
-		
-		var params = []; 
-		for(p in props) if(props[p]) params.push(p + '=' + Packages.java.net.URLEncoder.encode(props[p]));
-		if(this.requestType == GA_REQUEST_TYPE_EVENT && this.eventCategory && this.eventAction){
-			var evt = [this.eventCategory,this.eventAction]
-			if(this.eventLabel)evt.push(this.eventLabel);
-			if(this.eventValue)evt.push(this.eventValue);
+
+		var params = [];
+		for (p in props) {
+			if (props[p]) {
+				params.push(p + '=' + Packages.java.net.URLEncoder.encode(props[p])); //CHECKME: why using inline Java here for enconding and not JavaScript encodeURI(Component)?
+			}
+		}
+		if (this.requestType == GA_REQUEST_TYPE_EVENT && this.eventCategory && this.eventAction) {
+			var evt = [this.eventCategory, this.eventAction]
+			if (this.eventLabel)evt.push(this.eventLabel);
+			if (this.eventValue)evt.push(this.eventValue);
 			params.push('utme=5(' + evt.join('*') + ')');
 		}
 		return params.join('&');
@@ -348,6 +361,7 @@ function GATrackingRequest(gaSession){
 	}
 }
 
+
 /**
  * Initializes the current session object for the running client instance
  * Attempts to load persistent session data from user properties. Resumes session if found.
@@ -357,10 +371,8 @@ function GATrackingRequest(gaSession){
  * @properties={typeid:24,uuid:"95E85CFD-2BB1-45E9-A6FC-BE1C8D3E44D9"}
  */
 function initSession(trackingCode, resumeFromUserProps){
-	
 	// TODO: Can be called more than once? Or implement something like session.destroy() to notify GA?
 	if(!trackingCode) throw 'Tracking code required'
-	
 	/**
 	 * @type {scopes.modGoogleAnalytics.GASession}
 	 */
@@ -376,7 +388,7 @@ function initSession(trackingCode, resumeFromUserProps){
 		var pv =  application.getUserProperty('ga.previousVisit');
 		var cv =  application.getUserProperty('ga.currentVisit');
 		var sc =  application.getUserProperty('ga.sessionCount');
-		if(tc == trackingCode && clientSession.hostNameHash == hnh && clientSession.visitorID == vid && fv && pv && cv && sc){
+		if(tc == trackingCode && clientSession.hostNameHash == hnh &&  clientSession.visitorID == vid && fv && pv && cv && sc){
 			clientSession.firstVisit = fv;
 			clientSession.previousVisit= pv;
 			clientSession.currentVisit = cv;
@@ -385,7 +397,7 @@ function initSession(trackingCode, resumeFromUserProps){
 		}
 	}
 	
-	//	Store to client props
+	//Store to client props
 	persistClientSession();
 	
 	return clientSession;
@@ -429,14 +441,94 @@ function onDispatchCallback(event){
 }
 
 /**
- * Remote dispatch for all GA HTTP requests 
+ * Remote dispatch for all GA HTTP requests
  * receives requested URLs in a server-side queue and processes sequentially
  * @param {String} url
+ * @param {String} [userAgent]
  * @properties={typeid:24,uuid:"01382ADE-B92E-4C19-8B02-5484367F17EB"}
  */
-function dispatchRemote(url){
-	var res = plugins.http.createNewHttpClient().createGetRequest(url).executeRequest();
-	return res.getStatusCode();
+function dispatchRemote(url, userAgent){
+	var client = plugins.http.createNewHttpClient()
+	var req = client.createGetRequest(url);
+	
+	//TODO: make the UserAgent determination a one-time thing per session to prevent overhead
+	req.addHeader("User-Agent", userAgent||generateUAString())
+	var response = req.executeRequest()
+	return response.getStatusCode()
+}
+
+/**
+ * First draft of generating proper User Agent strings from which Google Analytics can get the relevant information
+ * The User Agent strings are custom only for Smart, Headless and Runtime client. For Web Client the actual browser User Agent string is forwarded.
+ * 
+ * Implementation is far form complete. Much of the info used by browsers to generate US Strings seems unavailable in Java. Need to figure out how to improve this
+ * 
+ * For more info on User Agent Strings, see:
+ * - http://en.wikipedia.org/wiki/User_agent
+ * - http://www.texsoft.it/index.php?c=software&m=sw.php.useragent&l=it
+ * - http://lopica.sourceforge.net/os.html
+ * - http://www.useragentstring.com/pages/Chrome/
+ * - http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
+ * 
+ * TODO improve platform/os info in UA String 
+ * TODO append relevant Servoy info to Web Client US String
+ * TODO somehow differentiate between Smart, Headless and runtime Client in the UA String
+ * 
+ * @return {String}
+ * @properties={typeid:24,uuid:"C1D52EAF-FFDD-4812-9186-7234FCBDA45B"}
+ */
+function generateUAString() {
+	var uaString;
+	switch (application.getApplicationType()) {
+		case APPLICATION_TYPES.WEB_CLIENT:
+			/** @type {Packages.org.apache.wicket.protocol.http.request.WebClientInfo}*/
+			var info = Packages.org.apache.wicket.RequestCycle.get().getClientInfo()
+			uaString = info.getUserAgent()
+			break;
+		case APPLICATION_TYPES.HEADLESS_CLIENT: //Intentional fall-through
+		case APPLICATION_TYPES.RUNTIME_CLIENT: //Intentional fall-through
+		case APPLICATION_TYPES.SMART_CLIENT:
+			uaString = 'Java/' + Packages.java.lang.System.getProperty("java.version")
+			uaString += ' (' 
+			var os = application.getOSName().toLowerCase()
+			var platform = os.indexOf('win') != -1 ? 'win' : os.indexOf('mac') != -1 ? 'mac' : 'linux'
+			switch (platform) {
+				case 'win':
+					var versions = {
+						'4.0': '',
+						'4.10': '',
+						'4.90': '',
+						'5.0': 'Windows NT 5.0', //Windows 2000
+						'5.01': 'Windows NT 5.01', //Windows 200, Service Pack 1 (SP1)
+						'5.1': 'Windows NT 5.1', //Windows XP
+						'5.2': 'Windows NT 5.2', //Windows Servoy 2003; Windows P x64 Edition
+						'6.0': 'Windows NT 6.0', //Windows Vista
+						'6.1': 'Windows NT 6.1', //Windows 7
+						'6.2': 'Windows NT 6.2' //windows 8 Release Preview	
+					}
+					if (!versions[Packages.java.lang.System.getProperty('os.version')]) {
+						//TODO: log
+					} else {
+						uaString += versions[Packages.java.lang.System.getProperty('os.version')]
+					}
+					if (Packages.java.lang.System.getProperty("os.arch").indexOf('64') && true) {
+						uaString += '; WOW64'
+					}
+					break;
+				case 'mac':
+					uaString += 'Macintosh'
+					break
+				case 'linux':
+					uaString += 'X11;'
+					break
+				default:
+					break;
+			}	
+			uaString += ')'
+			uaString += ' Servoy/' + application.getVersion()
+			break;
+	}
+	return uaString
 }
 
 /**
@@ -484,17 +576,7 @@ function getVisitorHash(userName){
  * @properties={typeid:24,uuid:"6475B5E0-0356-4DBC-84CB-E5002F538B19"}
  */
 function getHeadlessClient(){
-	var c;
-	if(headlessClientID){
-		c = plugins.headlessclient.getClient(headlessClientID);
-		if(c && c.isValid()) return c;
-	}
-	
-	//	TODO this is a work-around for weirdness in HC plugin in developer (filed a case for it)
 	var un = 'GA-dispatch-remote-user';
 	var pw = 'servoy'
-		
-	c = plugins.headlessclient.createClient('modGoogleAnalytics',un,pw,null);
-	headlessClientID = c.getClientID();
-	return c;
+	return plugins.headlessclient.getOrCreateClient('C7C83E36-7B72-4659-8459-AA3181620071','modGoogleAnalytics',un,pw,null);
 }
