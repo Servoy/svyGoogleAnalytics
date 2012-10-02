@@ -427,8 +427,9 @@ function persistClientSession(){
  */
 function dispatch(request, callback){
 	var url = request.buildURL()
-	var c = getHeadlessClient();
-	c.queueMethod(null,'scopes.modGoogleAnalytics.dispatchRemote',[url],onDispatchCallback);
+	var userAgent = generateUAString()
+	
+	getHeadlessClient().queueMethod(null,'scopes.modGoogleAnalytics.dispatchRemote', [url, userAgent], onDispatchCallback);
 }
 
 /**
@@ -451,8 +452,9 @@ function dispatchRemote(url, userAgent){
 	var client = plugins.http.createNewHttpClient()
 	var req = client.createGetRequest(url);
 	
-	//TODO: make the UserAgent determination a one-time thing per session to prevent overhead
-	req.addHeader("User-Agent", userAgent||generateUAString())
+	if (userAgent) {
+		req.addHeader("User-Agent", userAgent)
+	}
 	var response = req.executeRequest()
 	return response.getStatusCode()
 }
