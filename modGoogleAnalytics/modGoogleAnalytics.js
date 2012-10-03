@@ -46,6 +46,22 @@ var clientSession;
 var RFC_1918_RANGES = /(^127\.0\.0\.1)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^192\.168\.)/;
 
 /**
+ * The standard prefix for a tracking code
+ * @type {String}
+ * @private 
+ * @properties={typeid:35,uuid:"D02EDC81-E9AE-4ED1-9EB3-1A25DB9E96B3"}
+ */
+var GA_TRACKING_PREFIX = 'GA';
+
+/**
+ * The tracking code prefix for mobile (server-side) usage
+ * @type {String}
+ * @private 
+ * @properties={typeid:35,uuid:"C4A11EC8-4DB7-4D36-B997-BF2E95B0F3C6"}
+ */
+var MO_TRACKING_PREFIX = 'MO';
+
+/**
  * Access the current client session
  * @return {GASession}
  * @properties={typeid:24,uuid:"AB2C7D22-1547-4E43-89C3-8271F4EF65DC"}
@@ -66,7 +82,7 @@ function GASession(code){
 	 * Use the MO prefix to allow for utmip parameter for client IP/location
 	 * @type {String}
 	 */
-	this.trackingCode = utils.stringReplace(code,'GA','MO');
+	this.trackingCode = code;
 	
 	/**
 	 * GA Version
@@ -188,7 +204,7 @@ function GASession(code){
 			utmul:this.language,
 			utmje:this.javaEnabled,
 			utmfl:this.servoyVerion,
-			utmac:this.trackingCode,
+			utmac:utils.stringReplace(this.trackingCode,GA_TRACKING_PREFIX,MO_TRACKING_PREFIX),	// Replace with MO prefix to ensure client IP is located
 			utmcc:'__utma='+new Array(this.hostNameHash,this.visitorID,this.firstVisit,this.previousVisit,this.currentVisit,this.sessionCount).join('.')
 		};
 		var params = []; 
