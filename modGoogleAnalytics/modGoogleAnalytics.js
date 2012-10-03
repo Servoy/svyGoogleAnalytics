@@ -24,6 +24,7 @@ var GA_REQUEST_TYPE_EVENT = 'event';
 
 /**
  * Instance of the current client session
+ * Multiple client session objects can be created, but a single client session is cached for convenience as a single GA session maps to a single Servoy Client
  * @type {scopes.modGoogleAnalytics.GASession}
  * @private
  * @properties={typeid:35,uuid:"4D0E2DB3-A30C-4E29-9FCE-E5D2C35EA2EF",variableType:-4}
@@ -51,7 +52,7 @@ var RFC_1918_RANGES = /(^127\.0\.0\.1)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)
  * @private 
  * @properties={typeid:35,uuid:"D02EDC81-E9AE-4ED1-9EB3-1A25DB9E96B3"}
  */
-var GA_TRACKING_PREFIX = 'UA';
+var UA_TRACKING_PREFIX = 'UA';
 
 /**
  * The tracking code prefix for mobile (server-side) usage
@@ -62,7 +63,7 @@ var GA_TRACKING_PREFIX = 'UA';
 var MO_TRACKING_PREFIX = 'MO';
 
 /**
- * Access the current client session
+ * Access the "current" client session which maps to the running Servoy Client session
  * @return {GASession}
  * @properties={typeid:24,uuid:"AB2C7D22-1547-4E43-89C3-8271F4EF65DC"}
  */
@@ -71,7 +72,9 @@ function getClientSession(){
 }
 
 /**
- * Creates a new GASession Instance
+ * Creates a new GASession Instance which maps to the current Servoy Client instance
+ * 
+ * This class manages the GA Session state and issues event tracking requests
  * @constructor 
  * @properties={typeid:24,uuid:"EEE3A675-1BF8-4BF5-A16B-519CFC23CDD2"}
  */
@@ -204,7 +207,7 @@ function GASession(code){
 			utmul:this.language,
 			utmje:this.javaEnabled,
 			utmfl:this.servoyVerion,
-			utmac:utils.stringReplace(this.trackingCode,GA_TRACKING_PREFIX,MO_TRACKING_PREFIX),	// Replace with MO prefix to ensure client IP is located
+			utmac:utils.stringReplace(this.trackingCode,UA_TRACKING_PREFIX,MO_TRACKING_PREFIX),	// Replace with MO prefix to ensure client IP is located
 			utmcc:'__utma='+new Array(this.hostNameHash,this.visitorID,this.firstVisit,this.previousVisit,this.currentVisit,this.sessionCount).join('.')
 		};
 		var params = []; 
