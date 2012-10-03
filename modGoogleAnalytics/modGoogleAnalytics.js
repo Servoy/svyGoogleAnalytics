@@ -31,6 +31,21 @@ var GA_REQUEST_TYPE_EVENT = 'event';
 var clientSession;
 
 /**
+ * A static, Regular Expression to match any IP address which is deemed to be private by the RFC-1918 Standard for IPv4.
+ * Uses the following ranges
+ * 
+ * 127.  0.0.1
+ * 10.   0.0.0 –  10.255.255.255
+ * 172. 16.0.0 – 172. 31.255.255
+ * 192.168.0.0 – 192.168.255.255
+ * 
+ * @type {RegExp}
+ * @private
+ * @properties={typeid:35,uuid:"31F170BE-B7EC-46F8-9248-7E0EB5B3E237",variableType:-4}
+ */
+var RFC_1918_RANGES = /(^127\.0\.0\.1)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^192\.168\.)/;
+
+/**
  * Access the current client session
  * @return {GASession}
  * @properties={typeid:24,uuid:"AB2C7D22-1547-4E43-89C3-8271F4EF65DC"}
@@ -48,9 +63,10 @@ function GASession(code){
 	
 	/**
 	 * Tracking code for individual GA account/domain
+	 * Use the MO prefix to allow for utmip parameter for client IP/location
 	 * @type {String}
 	 */
-	this.trackingCode = code;
+	this.trackingCode = utils.stringReplace(code,'GA','MO');
 	
 	/**
 	 * GA Version
@@ -328,6 +344,12 @@ function GATrackingRequest(gaSession){
 			utmt: 	this.requestType
 		};
 
+		//	Add ip address parameter only when client IP is NOT private
+		var ipAddress = application.getIPAddress();
+		if(!RFC_1918_RANGES.test(ipAddress)){
+			props.utmip = ipAddress;
+		}
+		
 		var params = [];
 		for (p in props) {
 			if (props[p]) {
@@ -426,8 +448,8 @@ function persistClientSession(){
  * @properties={typeid:24,uuid:"6D976D46-2F5B-41F9-AC78-BB6B6E618DF3"}
  */
 function dispatch(request, callback){
-	var url = request.buildURL()
-	var userAgent = generateUAString()
+	var url = request.buildURL();
+	var userAgent = generateUAString();
 	
 	getHeadlessClient().queueMethod(null,'scopes.modGoogleAnalytics.dispatchRemote', [url, userAgent], onDispatchCallback);
 }
@@ -453,10 +475,10 @@ function dispatchRemote(url, userAgent){
 	var req = client.createGetRequest(url);
 	
 	if (userAgent) {
-		req.addHeader("User-Agent", userAgent)
+		req.addHeader("User-Agent", userAgent);
 	}
-	var response = req.executeRequest()
-	return response.getStatusCode()
+	var response = req.executeRequest();
+	return response.getStatusCode();
 }
 
 /**
