@@ -51,7 +51,7 @@ var RFC_1918_RANGES = /(^127\.0\.0\.1)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)
  * @private 
  * @properties={typeid:35,uuid:"D02EDC81-E9AE-4ED1-9EB3-1A25DB9E96B3"}
  */
-var GA_TRACKING_PREFIX = 'GA';
+var GA_TRACKING_PREFIX = 'UA';
 
 /**
  * The tracking code prefix for mobile (server-side) usage
