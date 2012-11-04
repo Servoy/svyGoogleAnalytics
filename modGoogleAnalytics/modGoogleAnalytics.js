@@ -462,6 +462,8 @@ function persistClientSession(){
 /**
  * Central dispatch for all GA HTTP requests 
  * Asynchronously sends requests to a server-side queue.
+ * FIXME:put scope name param in constant
+ * 
  * @param {GATrackingRequest} request
  * @param {Function} [callback]
  * @properties={typeid:24,uuid:"6D976D46-2F5B-41F9-AC78-BB6B6E618DF3"}
@@ -613,6 +615,7 @@ function getVisitorHash(userName){
 }
 
 /**
+ * FIXME: Use Constants for client id, user name and password 
  * Create and/or get headless client instance used to queue requests
  * @private
  * @return {plugins.headlessclient.JSClient}
