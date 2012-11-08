@@ -1,4 +1,48 @@
 /**
+ * @type {String}
+ * @private
+ *
+ * @properties={typeid:35,uuid:"40DEAB1D-3F4D-4A39-AF13-96060D2C7365"}
+ */
+var SOLUTION_NAME = 'modGoogleAnalytics';
+/**
+ * @type {String}
+ *
+ * @properties={typeid:35,uuid:"55DACCB0-5289-48DF-B2D3-30FD4AD09965"}
+ */
+var DEFAULT_REMOTE_USER_NAME = 'googleAnalyticsRemoteDispatch';
+/**
+ * @type {String}
+ * @private
+ *
+ * @properties={typeid:35,uuid:"CEE8334D-718B-47DE-924B-D5EBF5FEDC4A"}
+ */
+var DEFAULT_REMOTE_USER_PASSWORD = 'servoy';
+/**
+ * @type {String}
+ *
+ * @properties={typeid:35,uuid:"A37E497C-440A-4840-BB47-332D9BB2F65F"}
+ */
+var REMOTE_CLIENT_ID = '00000000-0000-0000-0000-00GANALYTICS';
+
+/**
+ * @type {String}
+ * @private 
+ *
+ * @properties={typeid:35,uuid:"0804955C-60AB-4C6B-9FBA-B7B0AD0C1C48"}
+ */
+var remoteUserName = DEFAULT_REMOTE_USER_NAME = DEFAULT_REMOTE_USER_NAME;
+
+/**
+ * @type {String}
+ * @private 
+ *
+ * @properties={typeid:35,uuid:"D3153FFF-4240-4E78-8317-7CBCE429279E"}
+ */
+var remoteUserPassword = DEFAULT_REMOTE_USER_PASSWORD = DEFAULT_REMOTE_USER_PASSWORD;
+
+
+/**
  * Base URL for GA HTTP service
  * @type {String}
  *
@@ -462,7 +506,6 @@ function persistClientSession(){
 /**
  * Central dispatch for all GA HTTP requests 
  * Asynchronously sends requests to a server-side queue.
- * FIXME:put scope name param in constant
  * 
  * @param {GATrackingRequest} request
  * @param {Function} [callback]
@@ -622,7 +665,30 @@ function getVisitorHash(userName){
  * @properties={typeid:24,uuid:"6475B5E0-0356-4DBC-84CB-E5002F538B19"}
  */
 function getHeadlessClient(){
-	var un = 'GA-dispatch-remote-user';
-	var pw = 'servoy'
-	return plugins.headlessclient.getOrCreateClient('C7C83E36-7B72-4659-8459-AA3181620071','modGoogleAnalytics',un,pw,null);
+	var client = plugins.headlessclient.getClient(REMOTE_CLIENT_ID);
+	if(!client){
+		var uid = security.getUserUID(remoteUserName);
+		if(!uid || !security.checkPassword(uid,remoteUserPassword) || security.getUserGroups(uid).getMaxRowIndex() < 1)
+			throw new scopes.svyExceptions.IllegalStateException(
+			'Failed to authenticate remote dispatch user "'+remoteUserName+'" for Google Analytics Remote Dispatch Client. '+
+			'Ensure that the account exists and has correct credentials and is valid/belongs to a valid group. '+
+			'The remote dispatch user can be configured using scopes.modGoogleAnalyics.setRemoteDispatchUser()');
+		client = plugins.headlessclient.getOrCreateClient(REMOTE_CLIENT_ID,SOLUTION_NAME,remoteUserName,remoteUserPassword,null);
+		if(!client) throw new scopes.svyExceptions.IllegalStateException('Failed to create headless client for PayPal Remote Dispatch. Check the server log for details');
+	}
+	if(!client.isValid()) throw new scopes.svyExceptions.IllegalStateException('PayPal Remote Dispatch Client exists, but is not valid');	
+	return client;
+	
+//	return plugins.headlessclient.getOrCreateClient('C7C83E36-7B72-4659-8459-AA3181620071','modGoogleAnalytics',un,pw,null);
+}
+
+/**
+ * @param {String} userName
+ * @param {String} password
+ *
+ * @properties={typeid:24,uuid:"7471A958-90F9-4867-8AEA-7FFA8B586C92"}
+ */
+function setRemoteDispatchUser(userName,password){
+	var client = plugins.headlessclient.getClient(REMOTE_CLIENT_ID);
+	if(client) throw new scopes.svyExceptions.IllegalStateException('The remote client (Client ID:'+REMOTE_CLIENT_ID+') is already started. Shutdown the client first and try again');
 }
