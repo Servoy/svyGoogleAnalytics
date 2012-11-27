@@ -465,6 +465,7 @@ function initSession(trackingCode, resumeFromUserProps){
 	
 	//	Attempt resume from user properties
 	//	TODO: Encrypt Tracking Code?
+	//	TODO: Use Svy Properties!
 	if(resumeFromUserProps){
 		var tc =  application.getUserProperty('ga.trackingCode');
 		var hnh = application.getUserProperty('ga.hostNameHash');
