@@ -42,7 +42,7 @@ function onLoad(event) {
  *
  * @properties={typeid:24,uuid:"107EBBEC-2B0E-4BE9-9855-E6F010E8DE4F"}
  */
-function testPageView(event) {
+function examplePageView(event) {
 	session.trackPageView('testSessionData','/ga-test/sessionData',null);
 }
 
