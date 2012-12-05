@@ -62,3 +62,12 @@ function cloneFrom(obj){
 		session.resume();
 	}
 }
+
+/**
+ * TODO remove when real test methods are added
+ * @author Sean
+ * @properties={typeid:24,uuid:"D7DA354E-946F-4749-83F3-3A252B3A6163"}
+ */
+function testDummy(){
+	
+}
