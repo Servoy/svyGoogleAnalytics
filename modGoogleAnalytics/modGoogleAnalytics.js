@@ -76,21 +76,6 @@ var GA_REQUEST_TYPE_EVENT = 'event';
 var clientSession;
 
 /**
- * A static, Regular Expression to match any IP address which is deemed to be private by the RFC-1918 Standard for IPv4.
- * Uses the following ranges
- * 
- * 127.  0.0.1
- * 10.   0.0.0 –  10.255.255.255
- * 172. 16.0.0 – 172. 31.255.255
- * 192.168.0.0 – 192.168.255.255
- * 
- * @type {RegExp}
- * @private
- * @properties={typeid:35,uuid:"31F170BE-B7EC-46F8-9248-7E0EB5B3E237",variableType:-4}
- */
-var RFC_1918_RANGES = /(^127\.0\.0\.1)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^192\.168\.)/;
-
-/**
  * The standard prefix for a tracking code
  * @type {String}
  * @private 
@@ -409,7 +394,7 @@ function GATrackingRequest(gaSession){
 
 		//	Add ip address parameter only when client IP is NOT private
 		var ipAddress = application.getIPAddress();
-		if(!RFC_1918_RANGES.test(ipAddress)){
+		if(!scopes.svyNet.isInternalIPAddress(ipAddress)){
 			props.utmip = ipAddress;
 		}
 		
