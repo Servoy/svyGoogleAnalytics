@@ -117,19 +117,13 @@ function GASession(code){
 	 * @type {String}
 	 */
 	this.trackingCode = code;
-	Object.defineProperty(this,'trackingCode',{
-		get:function(){return this.trackingCode}
-	});
 	
 	/**
 	 * GA Version
 	 * @type {String}
 	 */
 	this.gaVersion = '4.7.2';	//	TODO: Externalize and version
-	Object.defineProperty(this,'gaVersion',{
-		get:function(){return this.gaVersion}
-	});
-	
+
 	var t = getTimestamp();
 	
 	/**
@@ -137,70 +131,40 @@ function GASession(code){
 	 * @type {Number}
 	 */
 	this.firstVisit = t;
-	Object.defineProperty(this,'firstVisit',{
-		get:function(){return this.firstVisit},
-		set:function(x){this.firstVisit = x}
-	});
 	
 	/**
 	 * Time of previous visit (Unix timestamp)
 	 * @type {Number}
 	 */
 	this.previousVisit = t;
-	Object.defineProperty(this,'previousVisit',{
-		get:function(){return this.previousVisit},
-		set:function(x){this.previousVisit = x}
-	});
 	/**
 	 * Time of current visit (Unix timestamp)
 	 * @type {Number}
 	 */
 	this.currentVisit = t;
-	Object.defineProperty(this,'currentVisit',{
-		get:function(){return this.currentVisit},
-		set:function(x){this.currentVisit = x}
-	});
 	/**
 	 * Number of sessions (including current)
 	 * @type {Number}
 	 */
 	this.sessionCount = 1;
-	Object.defineProperty(this,'sessionCount',{
-		get:function(){return this.sessionCount},
-		set:function(x){this.sessionCount = x}
-	});
 	
 	/**
 	 * Name of client host computer
 	 * @type {String}
 	 */
 	this.hostName = application.getHostName();
-	Object.defineProperty(this,'hostName',{
-		get:function(){return this.hostName},
-		set:function(x){this.hostName = x}
-	});
 	
 	/**
 	 * Character Encoding
 	 * @type {String}
 	 */
 	this.encoding = Packages.java.lang.System.getProperty('file.encoding');
-	Object.defineProperty(this,'encoding',{
-		get:function(){return this.encoding},
-		set:function(x){this.encoding = x}
-	});
-	
 	/**
 	 * Screen resolution
 	 * @example 1280X800
 	 * @type {String}
 	 */
 	this.resolution = application.getScreenWidth() + 'x' + application.getScreenHeight();
-	Object.defineProperty(this,'resolution',{
-		get:function(){return this.resolution},
-		set:function(x){this.resolution = x}
-	});
-	
 	/**
 	 * Bit depth of display
 	 * @example 32
@@ -232,49 +196,30 @@ function GASession(code){
 	 * @type {String}
 	 */
 	this.language = i18n.getCurrentLanguage();
-	Object.defineProperty(this,'language',{
-		get:function(){return this.language},
-		set:function(x){this.language = x}
-	});
 	
 	/**
 	 * Java Enabled (Always 1)
 	 * @type {Number}
 	 */
 	this.javaEnabled = 1;
-	Object.defineProperty(this,'javaEnabled',{
-		get:function(){return this.javaEnabled},
-		set:function(x){this.javaEnabled = x}
-	});
+	
 	/**
 	 * Version of Servoy (Sent as flash version arg)
 	 * @type {String}
 	 */
 	this.servoyVerion = application.getVersion();
-	Object.defineProperty(this,'servoyVerion',{
-		get:function(){return this.servoyVerion},
-		set:function(x){this.servoyVerion = x}
-	});
 	
 	/**
 	 * Number to identify host between sessions
 	 * @type {Number}
 	 */
 	this.hostNameHash = getHostNameHash();
-	Object.defineProperty(this,'hostNameHash',{
-		get:function(){return this.hostNameHash},
-		set:function(x){this.hostNameHash = x}
-	});
 	
 	/**
 	 * Number to udentify visitor between sessions (Based on logged-in user name)
 	 * @type {Number}
 	 */
 	this.visitorID = getVisitorHash();
-	Object.defineProperty(this,'visitorID',{
-		get:function(){return this.visitorID},
-		set:function(x){this.visitorID = x}
-	});
 	
 	/**
 	 * Returns the GA-format HTTP Param string for this session, used to build request URL
@@ -381,51 +326,30 @@ function GATrackingRequest(gaSession){
 	 * @type {GASession}
 	 */
 	this.session = gaSession;
-	Object.defineProperty(this,'session',{
-		get:function(){return this.session},
-		set:function(x){this.session = x}
-	});
 	
 	/**
 	 * Category used for event requests
 	 * @type {String}
 	 */
 	this.eventCategory = null;
-	Object.defineProperty(this,'eventCategory',{
-		get:function(){return this.eventCategory},
-		set:function(x){this.eventCategory = x}
-	});
 	
 	/**
 	 * Action used for event requests
 	 * @type {String}
 	 */
 	this.eventAction = null;
-	Object.defineProperty(this,'eventAction',{
-		get:function(){return this.eventAction},
-		set:function(x){this.eventAction = x}
-	});
 	
 	/**
 	 * Label used for event requests
 	 * @type {String}
 	 */
 	this.eventLabel = null;
-	Object.defineProperty(this,'eventLabel',{
-		get:function(){return this.eventLabel},
-		set:function(x){this.eventLabel = x}
-	});
-	
-	
+		
 	/**
 	 * Value used for event requests
 	 * @type {String}
 	 */
 	this.eventValue = null;
-	Object.defineProperty(this,'eventValue',{
-		get:function(){return this.eventValue},
-		set:function(x){this.eventValue = x}
-	});
 	
 	/**
 	 * The request type (Use null for page view)
@@ -433,10 +357,6 @@ function GATrackingRequest(gaSession){
 	 * @type {String}
 	 */
 	this.requestType = null; 
-	Object.defineProperty(this,'requestType',{
-		get:function(){return this.requestType},
-		set:function(x){this.requestType = x}
-	});
 	
 	/**
 	 * Internal usage for unique request IDs
@@ -444,50 +364,30 @@ function GATrackingRequest(gaSession){
 	 * @type {Number}
 	 */
 	this.requestID = Math.ceil(Math.random()*1E9);
-	Object.defineProperty(this,'requestID',{
-		get:function(){return this.requestID},
-		set:function(x){this.requestID = x}
-	});
 	
 	/**
 	 * The page title for tracking page views
 	 * @type {String}
 	 */
 	this.pageTitle = null;
-	Object.defineProperty(this,'pageTitle',{
-		get:function(){return this.pageTitle},
-		set:function(x){this.pageTitle = x}
-	});
 	
 	/**
 	 * Unique ID generated for integration with ad-sense
 	 * @type {String}
 	 */
 	this.adSenseID = null;
-	Object.defineProperty(this,'adSenseID',{
-		get:function(){return this.adSenseID},
-		set:function(x){this.adSenseID = x}
-	});
 	
 	/**
 	 * The referring URL
 	 * @type {String}
 	 */
 	this.referral = null;
-	Object.defineProperty(this,'referral',{
-		get:function(){return this.referral},
-		set:function(x){this.referral = x}
-	});
 	
 	/**
 	 * The requested URL (ideally showing form context)
 	 * @type {String}
 	 */
 	this.pageRequest = null;
-	Object.defineProperty(this,'pageRequest',{
-		get:function(){return this.pageRequest},
-		set:function(x){this.pageRequest = x}
-	});
 	
 	/**
 	 * Returns the GA-formatted HTTP Parameter string for this request object. Includes session parameters as well.
