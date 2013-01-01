@@ -31,7 +31,7 @@ var REMOTE_CLIENT_ID = '00000000-0000-0000-0000-00GANALYTICS';
  *
  * @properties={typeid:35,uuid:"0804955C-60AB-4C6B-9FBA-B7B0AD0C1C48"}
  */
-var remoteUserName = DEFAULT_REMOTE_USER_NAME = DEFAULT_REMOTE_USER_NAME;
+var remoteUserName = DEFAULT_REMOTE_USER_NAME;
 
 /**
  * @type {String}
@@ -39,7 +39,7 @@ var remoteUserName = DEFAULT_REMOTE_USER_NAME = DEFAULT_REMOTE_USER_NAME;
  *
  * @properties={typeid:35,uuid:"D3153FFF-4240-4E78-8317-7CBCE429279E"}
  */
-var remoteUserPassword = DEFAULT_REMOTE_USER_PASSWORD = DEFAULT_REMOTE_USER_PASSWORD;
+var remoteUserPassword = DEFAULT_REMOTE_USER_PASSWORD;
 
 
 /**
@@ -51,20 +51,14 @@ var remoteUserPassword = DEFAULT_REMOTE_USER_PASSWORD = DEFAULT_REMOTE_USER_PASS
 var GA_BASE_URL = 'http://www.google-analytics.com/__utm.gif';
 
 /**
- * Constant for Request type page view
- * @type {String}
- *
- * @properties={typeid:35,uuid:"4EBCF71E-9C2A-4CB5-8FEC-34F4211089BB"}
+ * Constants for google analytics request types
+ * @enum
+ * @properties={typeid:35,uuid:"0CA570F2-14DA-43BA-B78E-FC135EB55139",variableType:-4}
  */
-var GA_REQUEST_TYPE_PAGE_VIEW = 'page';
-
-/**
- * Constant for Request type event
- * @type {String}
- *
- * @properties={typeid:35,uuid:"DC3A1AE4-9AAA-4A0C-9635-6FDB473CA566"}
- */
-var GA_REQUEST_TYPE_EVENT = 'event';
+var GA_REQUEST_TYPES = {
+	PAGE_VIEW:'page',
+	EVENT:'event'
+};
 
 /**
  * Instance of the current client session
@@ -74,6 +68,14 @@ var GA_REQUEST_TYPE_EVENT = 'event';
  * @properties={typeid:35,uuid:"4D0E2DB3-A30C-4E29-9FCE-E5D2C35EA2EF",variableType:-4}
  */
 var clientSession;
+
+/**
+ * Callback placeholder for tracking requests
+ * @type {Function}
+ * @private 
+ * @properties={typeid:35,uuid:"AADE4424-60B0-4C1F-8D37-B82C21C59DF8",variableType:-4}
+ */
+var requestCallback;
 
 /**
  * The standard prefix for a tracking code
@@ -115,12 +117,18 @@ function GASession(code){
 	 * @type {String}
 	 */
 	this.trackingCode = code;
+	Object.defineProperty(this,'trackingCode',{
+		get:function(){return this.trackingCode}
+	});
 	
 	/**
 	 * GA Version
 	 * @type {String}
 	 */
 	this.gaVersion = '4.7.2';	//	TODO: Externalize and version
+	Object.defineProperty(this,'gaVersion',{
+		get:function(){return this.gaVersion}
+	});
 	
 	var t = getTimestamp();
 	
@@ -129,36 +137,58 @@ function GASession(code){
 	 * @type {Number}
 	 */
 	this.firstVisit = t;
+	Object.defineProperty(this,'firstVisit',{
+		get:function(){return this.firstVisit},
+		set:function(x){this.firstVisit = x}
+	});
 	
 	/**
 	 * Time of previous visit (Unix timestamp)
 	 * @type {Number}
 	 */
 	this.previousVisit = t;
-	
+	Object.defineProperty(this,'previousVisit',{
+		get:function(){return this.previousVisit},
+		set:function(x){this.previousVisit = x}
+	});
 	/**
 	 * Time of current visit (Unix timestamp)
 	 * @type {Number}
 	 */
 	this.currentVisit = t;
-	
+	Object.defineProperty(this,'currentVisit',{
+		get:function(){return this.currentVisit},
+		set:function(x){this.currentVisit = x}
+	});
 	/**
 	 * Number of sessions (including current)
 	 * @type {Number}
 	 */
 	this.sessionCount = 1;
+	Object.defineProperty(this,'sessionCount',{
+		get:function(){return this.sessionCount},
+		set:function(x){this.sessionCount = x}
+	});
 	
 	/**
 	 * Name of client host computer
 	 * @type {String}
 	 */
 	this.hostName = application.getHostName();
+	Object.defineProperty(this,'hostName',{
+		get:function(){return this.hostName},
+		set:function(x){this.hostName = x}
+	});
 	
 	/**
 	 * Character Encoding
 	 * @type {String}
 	 */
 	this.encoding = Packages.java.lang.System.getProperty('file.encoding');
+	Object.defineProperty(this,'encoding',{
+		get:function(){return this.encoding},
+		set:function(x){this.encoding = x}
+	});
 	
 	/**
 	 * Screen resolution
@@ -166,6 +196,10 @@ function GASession(code){
 	 * @type {String}
 	 */
 	this.resolution = application.getScreenWidth() + 'x' + application.getScreenHeight();
+	Object.defineProperty(this,'resolution',{
+		get:function(){return this.resolution},
+		set:function(x){this.resolution = x}
+	});
 	
 	/**
 	 * Bit depth of display
@@ -183,13 +217,14 @@ function GASession(code){
 			case  APPLICATION_TYPES.HEADLESS_CLIENT:
 				retval = 0
 			case APPLICATION_TYPES.SMART_CLIENT:
+				retval = Packages.java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode().getBitDepth()
 			case APPLICATION_TYPES.RUNTIME_CLIENT:
 				retval = Packages.java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode().getBitDepth()
 			default:
 				break;
 		}
 		return retval.toFixed(0) + '-bit'
-	}()
+	}();
 		
 	/**
 	 * Language of client
@@ -197,30 +232,49 @@ function GASession(code){
 	 * @type {String}
 	 */
 	this.language = i18n.getCurrentLanguage();
+	Object.defineProperty(this,'language',{
+		get:function(){return this.language},
+		set:function(x){this.language = x}
+	});
 	
 	/**
 	 * Java Enabled (Always 1)
 	 * @type {Number}
 	 */
 	this.javaEnabled = 1;
-	
+	Object.defineProperty(this,'javaEnabled',{
+		get:function(){return this.javaEnabled},
+		set:function(x){this.javaEnabled = x}
+	});
 	/**
 	 * Version of Servoy (Sent as flash version arg)
 	 * @type {String}
 	 */
 	this.servoyVerion = application.getVersion();
+	Object.defineProperty(this,'servoyVerion',{
+		get:function(){return this.servoyVerion},
+		set:function(x){this.servoyVerion = x}
+	});
 	
 	/**
 	 * Number to identify host between sessions
 	 * @type {Number}
 	 */
 	this.hostNameHash = getHostNameHash();
+	Object.defineProperty(this,'hostNameHash',{
+		get:function(){return this.hostNameHash},
+		set:function(x){this.hostNameHash = x}
+	});
 	
 	/**
 	 * Number to udentify visitor between sessions (Based on logged-in user name)
 	 * @type {Number}
 	 */
 	this.visitorID = getVisitorHash();
+	Object.defineProperty(this,'visitorID',{
+		get:function(){return this.visitorID},
+		set:function(x){this.visitorID = x}
+	});
 	
 	/**
 	 * Returns the GA-format HTTP Param string for this session, used to build request URL
@@ -300,7 +354,7 @@ function GASession(code){
 	 */
 	this.trackEvent = function(pageTitle, pageRequest, referral, category, action, label, value){
 		var req = new scopes.modGoogleAnalytics.GATrackingRequest(this);
-		req.requestType = GA_REQUEST_TYPE_EVENT;
+		req.requestType = GA_REQUEST_TYPES.EVENT;
 		req.pageTitle = pageTitle;
 		req.pageRequest = pageRequest;
 		req.referral = referral;
@@ -310,6 +364,8 @@ function GASession(code){
 		req.eventValue = value;
 		return req.execute();	
 	}
+	
+	Object.seal(this);
 }
 
 /**
@@ -325,58 +381,113 @@ function GATrackingRequest(gaSession){
 	 * @type {GASession}
 	 */
 	this.session = gaSession;
+	Object.defineProperty(this,'session',{
+		get:function(){return this.session},
+		set:function(x){this.session = x}
+	});
+	
 	/**
 	 * Category used for event requests
 	 * @type {String}
 	 */
 	this.eventCategory = null;
+	Object.defineProperty(this,'eventCategory',{
+		get:function(){return this.eventCategory},
+		set:function(x){this.eventCategory = x}
+	});
+	
 	/**
 	 * Action used for event requests
 	 * @type {String}
 	 */
 	this.eventAction = null;
+	Object.defineProperty(this,'eventAction',{
+		get:function(){return this.eventAction},
+		set:function(x){this.eventAction = x}
+	});
+	
 	/**
 	 * Label used for event requests
 	 * @type {String}
 	 */
 	this.eventLabel = null;
+	Object.defineProperty(this,'eventLabel',{
+		get:function(){return this.eventLabel},
+		set:function(x){this.eventLabel = x}
+	});
+	
+	
 	/**
 	 * Value used for event requests
 	 * @type {String}
 	 */
 	this.eventValue = null;
+	Object.defineProperty(this,'eventValue',{
+		get:function(){return this.eventValue},
+		set:function(x){this.eventValue = x}
+	});
+	
 	/**
 	 * The request type (Use null for page view)
-	 * @example GA_REQUEST_TYPE_EVENT
+	 * @example GA_REQUEST_TYPES.EVENT
 	 * @type {String}
 	 */
 	this.requestType = null; 
+	Object.defineProperty(this,'requestType',{
+		get:function(){return this.requestType},
+		set:function(x){this.requestType = x}
+	});
+	
 	/**
 	 * Internal usage for unique request IDs
 	 * @private 
 	 * @type {Number}
 	 */
 	this.requestID = Math.ceil(Math.random()*1E9);
+	Object.defineProperty(this,'requestID',{
+		get:function(){return this.requestID},
+		set:function(x){this.requestID = x}
+	});
+	
 	/**
 	 * The page title for tracking page views
 	 * @type {String}
 	 */
 	this.pageTitle = null;
+	Object.defineProperty(this,'pageTitle',{
+		get:function(){return this.pageTitle},
+		set:function(x){this.pageTitle = x}
+	});
+	
 	/**
 	 * Unique ID generated for integration with ad-sense
 	 * @type {String}
 	 */
 	this.adSenseID = null;
+	Object.defineProperty(this,'adSenseID',{
+		get:function(){return this.adSenseID},
+		set:function(x){this.adSenseID = x}
+	});
+	
 	/**
 	 * The referring URL
 	 * @type {String}
 	 */
 	this.referral = null;
+	Object.defineProperty(this,'referral',{
+		get:function(){return this.referral},
+		set:function(x){this.referral = x}
+	});
+	
 	/**
 	 * The requested URL (ideally showing form context)
 	 * @type {String}
 	 */
 	this.pageRequest = null;
+	Object.defineProperty(this,'pageRequest',{
+		get:function(){return this.pageRequest},
+		set:function(x){this.pageRequest = x}
+	});
 	
 	/**
 	 * Returns the GA-formatted HTTP Parameter string for this request object. Includes session parameters as well.
@@ -404,7 +515,7 @@ function GATrackingRequest(gaSession){
 				params.push(p + '=' + Packages.java.net.URLEncoder.encode(props[p])); //CHECKME: why using inline Java here for enconding and not JavaScript encodeURI(Component)?
 			}
 		}
-		if (this.requestType == GA_REQUEST_TYPE_EVENT && this.eventCategory && this.eventAction) {
+		if (this.requestType == GA_REQUEST_TYPES.EVENT && this.eventCategory && this.eventAction) {
 			var evt = [this.eventCategory, this.eventAction]
 			if (this.eventLabel)evt.push(this.eventLabel);
 			if (this.eventValue)evt.push(this.eventValue);
@@ -429,6 +540,8 @@ function GATrackingRequest(gaSession){
 	this.execute = function(callback){
 		dispatch(this,callback);
 	}
+	
+	Object.seal(this);
 }
 
 
@@ -441,8 +554,13 @@ function GATrackingRequest(gaSession){
  * @properties={typeid:24,uuid:"95E85CFD-2BB1-45E9-A6FC-BE1C8D3E44D9"}
  */
 function initSession(trackingCode, resumeFromUserProps){
-	// TODO: Can be called more than once? Or implement something like session.destroy() to notify GA?
-	if(!trackingCode) throw 'Tracking code required'
+	
+	if(!trackingCode){
+		throw new scopes.svyExceptions.IllegalArgumentException('Tracking code required');
+	}
+	if(clientSession){
+		throw new scopes.svyExceptions.IllegalStateException('Session is already initialized. Call session destroy first');
+	}
 	/**
 	 * @type {scopes.modGoogleAnalytics.GASession}
 	 */
@@ -475,7 +593,18 @@ function initSession(trackingCode, resumeFromUserProps){
 }
 
 /**
+ * Destroys the current session, after which initSession() can be called
+ * @properties={typeid:24,uuid:"FC8145FB-8923-4C66-8A18-1AE4214461C4"}
+ */
+function destroySession(){
+	if(clientSession){
+		clientSession = null;
+	}
+}
+
+/**
  * Persists current session data in user properties. Allows for subsequent resumption. 
+ * @private
  * @properties={typeid:24,uuid:"B79094D6-6B5E-4F52-A86F-0D7A203605B2"}
  */
 function persistClientSession(){
@@ -498,6 +627,7 @@ function persistClientSession(){
  * @properties={typeid:24,uuid:"6D976D46-2F5B-41F9-AC78-BB6B6E618DF3"}
  */
 function dispatch(request, callback){
+	requestCallback = callback;
 	var url = request.buildURL();
 	var userAgent = generateUAString();
 	
@@ -505,12 +635,20 @@ function dispatch(request, callback){
 }
 
 /**
+ * Callback handler for GA request, delegates to callback handler if assigned
  * @param {JSEvent} event
- *
+ * @private 
  * @properties={typeid:24,uuid:"D57C559D-6691-4401-8612-8C94EC9D48E5"}
  */
 function onDispatchCallback(event){
-	application.output(event);
+	if(event.getType() != plugins.headlessclient.JSClient.CALLBACK_EVENT){
+		application.output('No response received for GA Tracking request',LOGGINGLEVEL.ERROR);
+	}
+	if(!requestCallback){
+		return;
+	}	
+	requestCallback.apply(this,[event.data]);
+	requestCallback = null;
 }
 
 /**
@@ -527,8 +665,10 @@ function dispatchRemote(url, userAgent){
 	if (userAgent) {
 		req.addHeader("User-Agent", userAgent);
 	}
-	var response = req.executeRequest();
-	return response.getStatusCode();
+	var res = req.executeRequest();
+	var code = res.getStatusCode();
+	if(code != plugins.http.HTTP_STATUS.SC_OK) throw new scopes.svyExceptions.HTTPException('Failed HTTP Request',null,null,code,res.getResponseBody());
+	return code;
 }
 
 /**
