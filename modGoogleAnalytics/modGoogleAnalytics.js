@@ -405,7 +405,7 @@ function GATrackingRequest(gaSession){
 
 		//	Add ip address parameter only when client IP is NOT private
 		var ipAddress = application.getIPAddress();
-		if(!scopes.svyNet.isInternalIPAddress(ipAddress)){
+		if(!scopes.modUtils$net.isInternalIPAddress(ipAddress)){
 			props.utmip = ipAddress;
 		}
 		
