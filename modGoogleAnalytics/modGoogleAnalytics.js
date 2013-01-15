@@ -510,8 +510,8 @@ function destroySession(){
 function persistClientSession(){
 	if(!clientSession)return;
 	application.setUserProperty('ga.trackingCode',clientSession.trackingCode);
-	application.setUserProperty('ga.hostNameHash',clientSession.hostNameHash);
-	application.setUserProperty('ga.visitorID',clientSession.visitorID);
+	application.setUserProperty('ga.hostNameHash',clientSession.hostNameHash.toString());
+	application.setUserProperty('ga.visitorID',clientSession.visitorID.toString());
 	application.setUserProperty('ga.firstVisit',clientSession.firstVisit.toString());
 	application.setUserProperty('ga.previousVisit',clientSession.previousVisit.toString());
 	application.setUserProperty('ga.currentVisit',clientSession.currentVisit.toString());
