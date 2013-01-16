@@ -63,7 +63,7 @@ var GA_REQUEST_TYPES = {
 /**
  * Instance of the current client session
  * Multiple client session objects can be created, but a single client session is cached for convenience as a single GA session maps to a single Servoy Client
- * @type {scopes.modGoogleAnalytics.GASession}
+ * @type {GASession}
  * @private
  * @properties={typeid:35,uuid:"4D0E2DB3-A30C-4E29-9FCE-E5D2C35EA2EF",variableType:-4}
  */
@@ -246,7 +246,7 @@ function GASession(code){
 	/**
 	 * Resumes a session. Should called when session data has been persisted and the visitor is now returning
 	 * Resets the previous & current visit timestamps and the session count
-	 * @return {scopes.modGoogleAnalytics.GASession}
+	 * @this {GASession}
 	 */
 	this.resume = function(){
 		this.previousVisit = this.currentVisit;
@@ -263,7 +263,7 @@ function GASession(code){
 	 * @return {Boolean}
 	 */
 	this.trackPageView = function(pageTitle, pageRequest, referral){
-		var req = new scopes.modGoogleAnalytics.GATrackingRequest(this);
+		var req = new GATrackingRequest(this);
 		req.pageTitle = pageTitle;
 		req.pageRequest = pageRequest;
 		req.referral = referral;
@@ -298,7 +298,7 @@ function GASession(code){
 	 * @return {Boolean}
 	 */
 	this.trackEvent = function(pageTitle, pageRequest, referral, category, action, label, value){
-		var req = new scopes.modGoogleAnalytics.GATrackingRequest(this);
+		var req = new GATrackingRequest(this);
 		req.requestType = GA_REQUEST_TYPES.EVENT;
 		req.pageTitle = pageTitle;
 		req.pageRequest = pageRequest;
@@ -436,6 +436,7 @@ function GATrackingRequest(gaSession){
 	 * Executes this request object in an HTTP GET method
 	 * Convenience method which calls the dispatch method
 	 * @param {Function} [callback]
+	 * @this {GATrackingRequest}
 	 */
 	this.execute = function(callback){
 		dispatch(this,callback);
@@ -462,7 +463,7 @@ function initSession(trackingCode, resumeFromUserProps){
 		throw new scopes.modUtils$exceptions.IllegalStateException('Session is already initialized. Call session destroy first');
 	}
 	/**
-	 * @type {scopes.modGoogleAnalytics.GASession}
+	 * @type {GASession}
 	 */
 	clientSession = new GASession(trackingCode);
 	
