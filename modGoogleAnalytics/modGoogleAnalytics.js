@@ -239,7 +239,7 @@ function GASession(code){
 			utmcc:'__utma='+new Array(this.hostNameHash,this.visitorID,this.firstVisit,this.previousVisit,this.currentVisit,this.sessionCount).join('.')
 		};
 		var params = []; 
-		for(p in props) if(props[p]) params.push(p + '=' + Packages.java.net.URLEncoder.encode(props[p]));
+		for(var p in props) if(props[p]) params.push(p + '=' + Packages.java.net.URLEncoder.encode(props[p]));
 		return params.join('&');
 	}
 
@@ -410,7 +410,7 @@ function GATrackingRequest(gaSession){
 		}
 		
 		var params = [];
-		for (p in props) {
+		for (var p in props) {
 			if (props[p]) {
 				params.push(p + '=' + Packages.java.net.URLEncoder.encode(props[p])); //CHECKME: why using inline Java here for enconding and not JavaScript encodeURI(Component)?
 			}
