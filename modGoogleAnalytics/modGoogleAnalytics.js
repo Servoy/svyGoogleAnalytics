@@ -7,7 +7,7 @@
 var SOLUTION_NAME = 'modGoogleAnalytics';
 /**
  * @type {String}
- *
+ * @private
  * @properties={typeid:35,uuid:"55DACCB0-5289-48DF-B2D3-30FD4AD09965"}
  */
 var DEFAULT_REMOTE_USER_NAME = 'googleAnalyticsRemoteDispatch';
@@ -20,7 +20,7 @@ var DEFAULT_REMOTE_USER_NAME = 'googleAnalyticsRemoteDispatch';
 var DEFAULT_REMOTE_USER_PASSWORD = 'servoy';
 /**
  * @type {String}
- *
+ * @private
  * @properties={typeid:35,uuid:"A37E497C-440A-4840-BB47-332D9BB2F65F"}
  */
 var REMOTE_CLIENT_ID = '00000000-0000-0000-0000-00GANALYTICS';
@@ -45,7 +45,7 @@ var remoteUserPassword = DEFAULT_REMOTE_USER_PASSWORD;
 /**
  * Base URL for GA HTTP service
  * @type {String}
- *
+ * @private 
  * @properties={typeid:35,uuid:"D0831A24-736F-4E0F-96DD-94E207302F3F"}
  */
 var GA_BASE_URL = 'http://www.google-analytics.com/__utm.gif';
@@ -56,7 +56,15 @@ var GA_BASE_URL = 'http://www.google-analytics.com/__utm.gif';
  * @properties={typeid:35,uuid:"0CA570F2-14DA-43BA-B78E-FC135EB55139",variableType:-4}
  */
 var GA_REQUEST_TYPES = {
+	
+	/**
+	 * Type Page view
+	 */
 	PAGE_VIEW:'page',
+	
+	/**
+	 * Type Event
+	 */
 	EVENT:'event'
 };
 
@@ -107,6 +115,7 @@ function getClientSession(){
  * 
  * This class manages the GA Session state and issues event tracking requests
  * @constructor 
+ * @private
  * @properties={typeid:24,uuid:"EEE3A675-1BF8-4BF5-A16B-519CFC23CDD2"}
  */
 function GASession(code){
@@ -223,6 +232,8 @@ function GASession(code){
 	
 	/**
 	 * Returns the GA-format HTTP Param string for this session, used to build request URL
+	 * 
+	 * @this {GASession}
 	 * @return {String}
 	 */
 	this.toHTTPQueryString = function(){
@@ -244,26 +255,30 @@ function GASession(code){
 	}
 
 	/**
-	 * Resumes a session. Should called when session data has been persisted and the visitor is now returning
+	 * Resumes a session. Should ONLY be called when session data has been persisted and the visitor is now returning
 	 * Resets the previous & current visit timestamps and the session count
+	 * This is called by
+	 * @see {@link #scopes#modGooglAnalytics#initClientSession}
 	 * @this {GASession}
 	 */
-	this.resume = function(){
+	this.resume = function resume(){
 		this.previousVisit = this.currentVisit;
 		this.currentVisit = getTimestamp();
-		this.sessionCount = this.sessionCount + 1; // Weirdness in code complete this.foo++ not working
+		this.sessionCount++;
 		return this;
 	}
 
 	/**
 	 * Sends a page view request to GA using the current session information and the supplied parameters
+	 * 
 	 * @param {String} pageTitle The name of the page
 	 * @param {String} pageRequest The requested URL (ideally the full form context)
-	 * @param {String} referral The referring URL if any
+	 * @param {String} [referral] The referring URL if any
 	 * @return {Boolean}
+	 * @this {GASession}
 	 */
 	this.trackPageView = function(pageTitle, pageRequest, referral){
-		var req = new GATrackingRequest(this);
+		var req = this.createRequest();
 		req.pageTitle = pageTitle;
 		req.pageRequest = pageRequest;
 		req.referral = referral;
@@ -271,10 +286,14 @@ function GASession(code){
 	}
 	
 	/**
-	 * EXPERIMENTAL!
 	 * Sends an event-tracking request to GA using the current session information and the supplied JSEvent object
 	 * This is a convenience method to track a component actions implicitly.
 	 * It is equivalent to calling trackEvent and supplying component information directly
+	 * 
+	 * TODO: EXPERIMENTAL. Hadn't been reviewd to see if results are meaningful
+	 * TODO: Add meaningful categories & labels to request
+	 * 
+	 * @this {GASession}
 	 * @param {JSEvent} event
 	 */
 	this.trackEventUI = function(event){
@@ -295,10 +314,10 @@ function GASession(code){
 	 * @param {String} action The event's action
 	 * @param {String} label The label for the event
 	 * @param {String} value Event data
-	 * @return {Boolean}
+	 * @this {GASession}
 	 */
 	this.trackEvent = function(pageTitle, pageRequest, referral, category, action, label, value){
-		var req = new GATrackingRequest(this);
+		var req = this.createRequest();
 		req.requestType = GA_REQUEST_TYPES.EVENT;
 		req.pageTitle = pageTitle;
 		req.pageRequest = pageRequest;
@@ -307,7 +326,17 @@ function GASession(code){
 		req.eventAction = action;
 		req.eventLabel = label;
 		req.eventValue = value;
-		return req.execute();	
+		req.execute();	
+	}
+	
+	/**
+	 * Returns a new request object for this session
+	 * 
+	 * @this {GASession}
+	 * @return {GATrackingRequest}
+	 */
+	this.createRequest = function(){
+		return new GATrackingRequest(this);
 	}
 	
 	Object.seal(this);
@@ -316,6 +345,7 @@ function GASession(code){
 /**
  * Creates a GA tracking request object
  * Set request parameters and invoke execute()
+ * @private
  * @constructor 
  * @properties={typeid:24,uuid:"948BC766-EE3C-4BA4-8346-11F1A800CE37"}
  */
@@ -391,6 +421,7 @@ function GATrackingRequest(gaSession){
 	
 	/**
 	 * Returns the GA-formatted HTTP Parameter string for this request object. Includes session parameters as well.
+	 * @this {GATrackingRequest}
 	 * @return {String}
 	 */
 	this.toHTTPQueryString = function() {
@@ -426,6 +457,7 @@ function GATrackingRequest(gaSession){
 	
 	/**
 	 * Builds the complete URL for this request object which can be dispatched to GA
+	 * @this {GATrackingRequest}
 	 * @return {String} url
 	 */
 	this.buildURL = function(){
@@ -434,12 +466,12 @@ function GATrackingRequest(gaSession){
 	
 	/**
 	 * Executes this request object in an HTTP GET method
-	 * Convenience method which calls the dispatch method
+	 * 
 	 * @param {Function} [callback]
 	 * @this {GATrackingRequest}
 	 */
 	this.execute = function(callback){
-		dispatch(this,callback);
+		dispatch(this.buildURL(),callback);
 	}
 	
 	Object.seal(this);
@@ -523,13 +555,14 @@ function persistClientSession(){
  * Central dispatch for all GA HTTP requests 
  * Asynchronously sends requests to a server-side queue.
  * 
- * @param {GATrackingRequest} request
+ * @param {String} url
  * @param {Function} [callback]
+ * @private
  * @properties={typeid:24,uuid:"6D976D46-2F5B-41F9-AC78-BB6B6E618DF3"}
  */
-function dispatch(request, callback){
+function dispatch(url, callback){
 	requestCallback = callback;
-	var url = request.buildURL();
+//	var url = request.buildURL();
 	var userAgent = generateUAString();
 	
 	getHeadlessClient().queueMethod(null,'scopes.modGoogleAnalytics.dispatchRemote', [url, userAgent], onDispatchCallback);
@@ -557,6 +590,7 @@ function onDispatchCallback(event){
  * receives requested URLs in a server-side queue and processes sequentially
  * @param {String} url
  * @param {String} [userAgent]
+ * @private
  * @properties={typeid:24,uuid:"01382ADE-B92E-4C19-8B02-5484367F17EB"}
  */
 function dispatchRemote(url, userAgent){
@@ -589,6 +623,7 @@ function dispatchRemote(url, userAgent){
  * TODO append relevant Servoy info to Web Client US String
  * TODO somehow differentiate between Smart, Headless and runtime Client in the UA String
  * 
+ * @private
  * @return {String}
  * @properties={typeid:24,uuid:"C1D52EAF-FFDD-4812-9186-7234FCBDA45B"}
  */
@@ -705,14 +740,14 @@ function getHeadlessClient(){
 	}
 	if(!client.isValid()) throw new scopes.modUtils$exceptions.IllegalStateException('PayPal Remote Dispatch Client exists, but is not valid');	
 	return client;
-	
-//	return plugins.headlessclient.getOrCreateClient('C7C83E36-7B72-4659-8459-AA3181620071','modGoogleAnalytics',un,pw,null);
 }
 
 /**
+ * Overrides the internal security user name and credentials for headless client usage
+ * 
  * @param {String} userName
  * @param {String} password
- *
+ * @private
  * @properties={typeid:24,uuid:"7471A958-90F9-4867-8AEA-7FFA8B586C92"}
  */
 function setRemoteDispatchUser(userName,password){

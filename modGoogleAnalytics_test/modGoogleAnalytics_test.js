@@ -17,7 +17,7 @@ function testGoogleAnalytics(){
 	jsunit.assertEquals('Test session construction', session.trackingCode, GA_TRACKING_CODE);
 	
 	//	test request instance w/ callback
-	var req = new scopes.modGoogleAnalytics.GATrackingRequest(scopes.modGoogleAnalytics.getClientSession());
+	var req = session.createRequest();
 	req.requestType = scopes.modGoogleAnalytics.GA_REQUEST_TYPES.PAGE_VIEW;
 	req.pageTitle = 'testPageTitle';
 	req.pageRequest = 'testPageRequest';
