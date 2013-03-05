@@ -602,7 +602,7 @@ function dispatchRemote(url, userAgent){
 	}
 	var res = req.executeRequest();
 	var code = res.getStatusCode();
-	if(code != plugins.http.HTTP_STATUS.SC_OK) throw new scopes.modUtils$exceptions.HTTPException('Failed HTTP Request', code, res.getResponseBody());
+	if(code != plugins.http.HTTP_STATUS.SC_OK) throw new scopes.modUtils$net.HTTPException('Failed HTTP Request', code, res.getResponseBody());
 	return code;
 }
 
