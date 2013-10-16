@@ -390,10 +390,9 @@ function GATrackingRequest(gaSession){
 	
 	/**
 	 * Internal usage for unique request IDs
-	 * @private 
 	 * @type {Number}
 	 */
-	this.requestID = Math.ceil(Math.random()*1E9);
+	var requestID = Math.ceil(Math.random()*1E9);
 	
 	/**
 	 * The page title for tracking page views
@@ -426,7 +425,7 @@ function GATrackingRequest(gaSession){
 	 */
 	this.toHTTPQueryString = function() {
 		var props = {
-			utmn: 	this.requestID,
+			utmn: 	requestID,
 			utmdt: 	this.pageTitle,
 			utmhid: this.adSenseID,
 			utmr: 	this.referral,
