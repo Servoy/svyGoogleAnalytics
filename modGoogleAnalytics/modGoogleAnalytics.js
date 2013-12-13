@@ -435,7 +435,7 @@ function GATrackingRequest(gaSession){
 
 		//	Add ip address parameter only when client IP is NOT private
 		var ipAddress = application.getIPAddress();
-		if(!scopes.modUtils$net.isInternalIPAddress(ipAddress)){
+		if(!scopes.svyNet.isInternalIPAddress(ipAddress)){
 			props.utmip = ipAddress;
 		}
 		
@@ -601,7 +601,7 @@ function dispatchRemote(url, userAgent){
 	}
 	var res = req.executeRequest();
 	var code = res.getStatusCode();
-	if(code != plugins.http.HTTP_STATUS.SC_OK) throw new scopes.modUtils$net.HTTPException('Failed HTTP Request', code, res.getResponseBody());
+	if(code != plugins.http.HTTP_STATUS.SC_OK) throw new scopes.svyNet.HTTPException('Failed HTTP Request', code, res.getResponseBody());
 	return code;
 }
 
