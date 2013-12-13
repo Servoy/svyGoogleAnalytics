@@ -488,10 +488,10 @@ function GATrackingRequest(gaSession){
 function initSession(trackingCode, resumeFromUserProps){
 	
 	if(!trackingCode){
-		throw new scopes.modUtils$exceptions.IllegalArgumentException('Tracking code required');
+		throw new scopes.svyExceptions.IllegalArgumentException('Tracking code required');
 	}
 	if(clientSession){
-		throw new scopes.modUtils$exceptions.IllegalStateException('Session is already initialized. Call session destroy first');
+		throw new scopes.svyExceptions.IllegalStateException('Session is already initialized. Call session destroy first');
 	}
 	/**
 	 * @type {GASession}
@@ -730,14 +730,14 @@ function getHeadlessClient(){
 	if(!client){
 		var uid = security.getUserUID(remoteUserName);
 		if(!uid || !security.checkPassword(uid,remoteUserPassword) || security.getUserGroups(uid).getMaxRowIndex() < 1)
-			throw new scopes.modUtils$exceptions.IllegalStateException(
+			throw new scopes.svyExceptions.IllegalStateException(
 			'Failed to authenticate remote dispatch user "'+remoteUserName+'" for Google Analytics Remote Dispatch Client. '+
 			'Ensure that the account exists and has correct credentials and is valid/belongs to a valid group. '+
 			'The remote dispatch user can be configured using scopes.modGoogleAnalyics.setRemoteDispatchUser()');
 		client = plugins.headlessclient.getOrCreateClient(REMOTE_CLIENT_ID,SOLUTION_NAME,remoteUserName,remoteUserPassword,null);
-		if(!client) throw new scopes.modUtils$exceptions.IllegalStateException('Failed to create headless client for PayPal Remote Dispatch. Check the server log for details');
+		if(!client) throw new scopes.svyExceptions.IllegalStateException('Failed to create headless client for PayPal Remote Dispatch. Check the server log for details');
 	}
-	if(!client.isValid()) throw new scopes.modUtils$exceptions.IllegalStateException('PayPal Remote Dispatch Client exists, but is not valid');	
+	if(!client.isValid()) throw new scopes.svyExceptions.IllegalStateException('PayPal Remote Dispatch Client exists, but is not valid');	
 	return client;
 }
 
@@ -751,5 +751,5 @@ function getHeadlessClient(){
  */
 function setRemoteDispatchUser(userName,password){
 	var client = plugins.headlessclient.getClient(REMOTE_CLIENT_ID);
-	if(client) throw new scopes.modUtils$exceptions.IllegalStateException('The remote client (Client ID:'+REMOTE_CLIENT_ID+') is already started. Shutdown the client first and try again');
+	if(client) throw new scopes.svyExceptions.IllegalStateException('The remote client (Client ID:'+REMOTE_CLIENT_ID+') is already started. Shutdown the client first and try again');
 }
