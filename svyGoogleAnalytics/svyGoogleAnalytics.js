@@ -735,9 +735,9 @@ function getHeadlessClient(){
 			'Ensure that the account exists and has correct credentials and is valid/belongs to a valid group. '+
 			'The remote dispatch user can be configured using scopes.modGoogleAnalyics.setRemoteDispatchUser()');
 		client = plugins.headlessclient.getOrCreateClient(REMOTE_CLIENT_ID,SOLUTION_NAME,remoteUserName,remoteUserPassword,null);
-		if(!client) throw new scopes.svyExceptions.IllegalStateException('Failed to create headless client for PayPal Remote Dispatch. Check the server log for details');
+		if(!client) throw new scopes.svyExceptions.IllegalStateException('Failed to create headless client for Google Analytics Remote Dispatch. Check the server log for details');
 	}
-	if(!client.isValid()) throw new scopes.svyExceptions.IllegalStateException('PayPal Remote Dispatch Client exists, but is not valid');	
+	if(!client.isValid()) throw new scopes.svyExceptions.IllegalStateException('Google Analytics Remote Dispatch Client exists, but is not valid');	
 	return client;
 }
 
