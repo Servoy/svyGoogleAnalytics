@@ -13,12 +13,12 @@ var GA_TRACKING_CODE = 'UA-30376830-1';
  * @properties={typeid:24,uuid:"0413647F-233E-45CE-8FCD-DF4A01509C3C"}
  */
 function testGoogleAnalytics(){
-	var session = scopes.modGoogleAnalytics.initSession(GA_TRACKING_CODE);
+	var session = scopes.svyGoogleAnalytics.initSession(GA_TRACKING_CODE);
 	jsunit.assertEquals('Test session construction', session.trackingCode, GA_TRACKING_CODE);
 	
 	//	test request instance w/ callback
 	var req = session.createRequest();
-	req.requestType = scopes.modGoogleAnalytics.GA_REQUEST_TYPES.PAGE_VIEW;
+	req.requestType = scopes.svyGoogleAnalytics.GA_REQUEST_TYPES.PAGE_VIEW;
 	req.pageTitle = 'testPageTitle';
 	req.pageRequest = 'testPageRequest';
 	req.referral = 'testReferral';
@@ -31,9 +31,9 @@ function testGoogleAnalytics(){
 	var previousVisit = session.previousVisit;
 	var currentVisit = session.currentVisit;
 	var sessionCount = session.sessionCount;
-	scopes.modGoogleAnalytics.destroySession();
+	scopes.svyGoogleAnalytics.destroySession();
 	application.sleep(100);
-	session = scopes.modGoogleAnalytics.initSession(GA_TRACKING_CODE,true);
+	session = scopes.svyGoogleAnalytics.initSession(GA_TRACKING_CODE,true);
 	jsunit.assertEquals('Test Session Resume',session.previousVisit,currentVisit);
 	jsunit.assertEquals('Test Session Resume',session.sessionCount,sessionCount + 1);
 	jsunit.assertEquals('Test Session Resume',session.firstVisit, firstVisit);
@@ -41,6 +41,6 @@ function testGoogleAnalytics(){
 	jsunit.assertTrue('Test Session Resume',session.currentVisit > currentVisit);
 	
 	//	tear down
-	scopes.modGoogleAnalytics.destroySession();
+	scopes.svyGoogleAnalytics.destroySession();
 	
 }
