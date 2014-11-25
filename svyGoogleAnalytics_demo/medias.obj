@@ -1,0 +1,16 @@
+[
+{
+encapsulation:0,
+mimeType:"image/jpeg",
+name:"Product_A.jpg",
+typeid:37,
+uuid:"20437B8C-64E6-4743-BC4C-164DB45FA05C"
+},
+{
+encapsulation:0,
+mimeType:"image/jpeg",
+name:"product_B.jpg",
+typeid:37,
+uuid:"01C728C1-5310-4F12-82C7-EF6CF22F6A23"
+}
+]
