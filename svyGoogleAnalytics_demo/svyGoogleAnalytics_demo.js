@@ -20,7 +20,7 @@ var COLORS = {
  * @private 
  * @properties={typeid:35,uuid:"D035A37D-76BF-4171-A067-DC6AAF21DA29"}
  */
-var GA_TRACKING_CODE = 'UA-56952164-1';
+var GA_TRACKING_CODE = undefined // set the tracking code, example: 'UA-46951664-1';
 
 /**
  * Callback method for when solution is opened.

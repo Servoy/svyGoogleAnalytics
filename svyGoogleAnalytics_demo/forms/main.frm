@@ -45,8 +45,8 @@ uuid:"57B1F437-25CA-443B-A8AA-62F279004180"
 },
 {
 location:"26,106",
-size:"395,30",
-text:"Use Google Analytics to track user click-flow.",
+size:"649,30",
+text:"Use Google Analytics to track user click-flow. Set your GA Tracking code in the svyGoogleAnalytics_demo scope.",
 transparent:true,
 typeid:7,
 uuid:"5964762B-ACD0-44DA-9C37-56A4A9F20BEF"
