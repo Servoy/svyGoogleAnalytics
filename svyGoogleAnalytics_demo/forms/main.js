@@ -1,28 +1,27 @@
 /**
- * @enum 
- * @public 
- * 
- * @properties={typeid:35,uuid:"FA93C89E-7D64-4531-82E4-93B7962B7DFA",variableType:-4}
+ * @type {String}
+ *
+ * @properties={typeid:35,uuid:"9F984476-269D-468E-B371-9CA96D862A1C"}
  */
-var PAGES = {
-	HOME: 1,
-	PRODUCT_A: 2,
-	PRODUCT_B: 3
-}
+var homeLayout;
+
 
 /**
- * Switch page menu
- * 
- * @param {Number} page
- * @public 
- * 
+ * Callback method when form is (re)loaded.
  *
- * @properties={typeid:24,uuid:"CC755D7D-3D6E-4694-8E29-0F8C8332A705"}
+ * @param {JSEvent} event the event that triggered the action
+ *
+ * @protected
+ *
+ * @properties={typeid:24,uuid:"4C7D0FAF-EF50-450C-ACC0-821D439E8BA7"}
  */
-function showPage(page) {
-	if (page < 1 || page > 3) {
-		throw new scopes.svyExceptions.IllegalArgumentException('Cannot show page. Page ' + page+ 'does not exists !')
+function onLoad(event) {
+
+	var x = Math.random()
+	if (x > 0.5) {
+		homeLayout = 'layoutA'
 	} else {
-		elements.tabless.tabIndex = page
+		homeLayout = 'layoutB'
 	}
+	elements.tabless.addTab(homeLayout)
 }

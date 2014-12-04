@@ -5,19 +5,7 @@
  * @properties={typeid:35,uuid:"40DEAB1D-3F4D-4A39-AF13-96060D2C7365"}
  */
 var SOLUTION_NAME = 'svyGoogleAnalytics';
-/**
- * @type {String}
- * @private
- * @properties={typeid:35,uuid:"55DACCB0-5289-48DF-B2D3-30FD4AD09965"}
- */
-var DEFAULT_REMOTE_USER_NAME = 'googleAnalyticsRemoteDispatch';
-/**
- * @type {String}
- * @private
- *
- * @properties={typeid:35,uuid:"CEE8334D-718B-47DE-924B-D5EBF5FEDC4A"}
- */
-var DEFAULT_REMOTE_USER_PASSWORD = 'servoy';
+
 /**
  * @type {String}
  * @private
@@ -31,7 +19,7 @@ var REMOTE_CLIENT_ID = '00000000-0000-0000-0000-00GANALYTICS';
  *
  * @properties={typeid:35,uuid:"0804955C-60AB-4C6B-9FBA-B7B0AD0C1C48"}
  */
-var remoteUserName = DEFAULT_REMOTE_USER_NAME;
+var remoteUserName;
 
 /**
  * @type {String}
@@ -39,7 +27,7 @@ var remoteUserName = DEFAULT_REMOTE_USER_NAME;
  *
  * @properties={typeid:35,uuid:"D3153FFF-4240-4E78-8317-7CBCE429279E"}
  */
-var remoteUserPassword = DEFAULT_REMOTE_USER_PASSWORD;
+var remoteUserPassword;
 
 
 /**
@@ -52,6 +40,7 @@ var GA_BASE_URL = 'http://www.google-analytics.com/__utm.gif';
 
 /**
  * Constants for google analytics request types
+ * @public  
  * @enum
  * @properties={typeid:35,uuid:"0CA570F2-14DA-43BA-B78E-FC135EB55139",variableType:-4}
  */
@@ -103,6 +92,7 @@ var MO_TRACKING_PREFIX = 'MO';
 
 /**
  * Access the "current" client session which maps to the running Servoy Client session
+ * @public 
  * @return {GASession}
  * @properties={typeid:24,uuid:"AB2C7D22-1547-4E43-89C3-8271F4EF65DC"}
  */
@@ -233,7 +223,7 @@ function GASession(code){
 	/**
 	 * Returns the GA-format HTTP Param string for this session, used to build request URL
 	 * 
-	 * @this {GASession}
+	 * @public 
 	 * @return {String}
 	 */
 	this.toHTTPQueryString = function(){
@@ -258,8 +248,8 @@ function GASession(code){
 	 * Resumes a session. Should ONLY be called when session data has been persisted and the visitor is now returning
 	 * Resets the previous & current visit timestamps and the session count
 	 * This is called by
-	 * @see {@link #scopes#modGooglAnalytics#initClientSession}
-	 * @this {GASession}
+	 * @see {@link #scopes#modGooglAnalytics#initSession}
+	 * @public 
 	 */
 	this.resume = function resume(){
 		this.previousVisit = this.currentVisit;
@@ -275,7 +265,7 @@ function GASession(code){
 	 * @param {String} pageRequest The requested URL (ideally the full form context)
 	 * @param {String} [referral] The referring URL if any
 	 * @return {Boolean}
-	 * @this {GASession}
+	 * @public 
 	 */
 	this.trackPageView = function(pageTitle, pageRequest, referral){
 		var req = this.createRequest();
@@ -293,7 +283,7 @@ function GASession(code){
 	 * TODO: EXPERIMENTAL. Hadn't been reviewd to see if results are meaningful
 	 * TODO: Add meaningful categories & labels to request
 	 * 
-	 * @this {GASession}
+	 * @public 
 	 * @param {JSEvent} event
 	 */
 	this.trackEventUI = function(event){
@@ -314,7 +304,7 @@ function GASession(code){
 	 * @param {String} action The event's action
 	 * @param {String} label The label for the event
 	 * @param {String} value Event data
-	 * @this {GASession}
+	 * @public 
 	 */
 	this.trackEvent = function(pageTitle, pageRequest, referral, category, action, label, value){
 		var req = this.createRequest();
@@ -332,7 +322,7 @@ function GASession(code){
 	/**
 	 * Returns a new request object for this session
 	 * 
-	 * @this {GASession}
+	 * @public 
 	 * @return {GATrackingRequest}
 	 */
 	this.createRequest = function(){
@@ -345,11 +335,13 @@ function GASession(code){
 /**
  * Creates a GA tracking request object
  * Set request parameters and invoke execute()
+ * 
  * @private
  * @constructor 
  * @properties={typeid:24,uuid:"948BC766-EE3C-4BA4-8346-11F1A800CE37"}
  */
 function GATrackingRequest(gaSession){
+	// see link: https://support.google.com/analytics/answer/1034380?hl=en
 	
 	/**
 	 * This request's session object
@@ -359,23 +351,27 @@ function GATrackingRequest(gaSession){
 	
 	/**
 	 * Category used for event requests
+	 * The category assigned to an event (e.g., Videos or Downloads)
 	 * @type {String}
 	 */
 	this.eventCategory = null;
 	
 	/**
 	 * Action used for event requests
+	 * The action assigned to an event (e.g., Play, Download Whitepaper)
 	 * @type {String}
 	 */
 	this.eventAction = null;
 	
 	/**
 	 * Label used for event requests
+	 * The label assigned to an event (any descriptive string you choose)
 	 * @type {String}
 	 */
 	this.eventLabel = null;
 		
 	/**
+	 * TODO deprecated ? chek custom values
 	 * Value used for event requests
 	 * @type {String}
 	 */
@@ -408,6 +404,7 @@ function GATrackingRequest(gaSession){
 	
 	/**
 	 * The referring URL
+	 * The external referrer, if any. This field is only populated for the initial external referral at the beginning of a session.
 	 * @type {String}
 	 */
 	this.referral = null;
@@ -420,7 +417,7 @@ function GATrackingRequest(gaSession){
 	
 	/**
 	 * Returns the GA-formatted HTTP Parameter string for this request object. Includes session parameters as well.
-	 * @this {GATrackingRequest}
+	 * @public 
 	 * @return {String}
 	 */
 	this.toHTTPQueryString = function() {
@@ -456,7 +453,7 @@ function GATrackingRequest(gaSession){
 	
 	/**
 	 * Builds the complete URL for this request object which can be dispatched to GA
-	 * @this {GATrackingRequest}
+	 * @public 
 	 * @return {String} url
 	 */
 	this.buildURL = function(){
@@ -467,7 +464,7 @@ function GATrackingRequest(gaSession){
 	 * Executes this request object in an HTTP GET method
 	 * 
 	 * @param {Function} [callback]
-	 * @this {GATrackingRequest}
+	 * @public 
 	 */
 	this.execute = function(callback){
 		dispatch(this.buildURL(),callback);
@@ -480,6 +477,7 @@ function GATrackingRequest(gaSession){
 /**
  * Initializes the current session object for the running client instance
  * Attempts to load persistent session data from user properties. Resumes session if found.
+ * @public 
  * @param {String} trackingCode
  * @param {Boolean} [resumeFromUserProps] Attempts to resume session data from previous visits stored in user properties file
  * @see GASession.resume()
@@ -487,10 +485,13 @@ function GATrackingRequest(gaSession){
  */
 function initSession(trackingCode, resumeFromUserProps){
 	
-	if(!trackingCode){
+	if (!trackingCode) {
 		throw new scopes.svyExceptions.IllegalArgumentException('Tracking code required');
 	}
-	if(clientSession){
+//	if (!remoteUserName || !remoteUserPassword) {
+//		throw new scopes.svyExceptions.IllegalArgumentException('Remote dispatch user is required. Call setRemoteDispatchUser first');
+//	}
+	if (clientSession) {
 		throw new scopes.svyExceptions.IllegalStateException('Session is already initialized. Call session destroy first');
 	}
 	/**
@@ -526,6 +527,7 @@ function initSession(trackingCode, resumeFromUserProps){
 
 /**
  * Destroys the current session, after which initSession() can be called
+ * @public 
  * @properties={typeid:24,uuid:"FC8145FB-8923-4C66-8A18-1AE4214461C4"}
  */
 function destroySession(){
@@ -744,12 +746,15 @@ function getHeadlessClient(){
 /**
  * Overrides the internal security user name and credentials for headless client usage
  * 
+ * @public 
  * @param {String} userName
  * @param {String} password
- * @private
+ * 
  * @properties={typeid:24,uuid:"7471A958-90F9-4867-8AEA-7FFA8B586C92"}
  */
 function setRemoteDispatchUser(userName,password){
 	var client = plugins.headlessclient.getClient(REMOTE_CLIENT_ID);
 	if(client) throw new scopes.svyExceptions.IllegalStateException('The remote client (Client ID:'+REMOTE_CLIENT_ID+') is already started. Shutdown the client first and try again');
+	remoteUserName = userName;
+	remoteUserPassword = password;
 }

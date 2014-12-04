@@ -34,8 +34,18 @@ var GA_TRACKING_CODE = undefined // set the tracking code, example: 'UA-46951664
  * @properties={typeid:24,uuid:"475F412D-2AEB-41AF-9554-5057FD29F47D"}
  */
 function onSolutionOpen(arg, queryParams) {
+	// set the GA dispatch user and start the headless client
+	try {
+		scopes.svyGoogleAnalytics.setRemoteDispatchUser('googleAnalyticsRemoteDispatch','servoy')
+	} catch (e) {
+		// the headless client is already started.
+	}
+
+	// init the GA Session
 	if (!scopes.svyGoogleAnalytics.initSession(GA_TRACKING_CODE)) {
 		throw new scopes.svyExceptions.IllegalStateException('GA cannot init session !')
+	} else {
+
 	}
 }
 

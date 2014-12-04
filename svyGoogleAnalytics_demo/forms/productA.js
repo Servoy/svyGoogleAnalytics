@@ -49,7 +49,7 @@ function onShow(firstShow, event) {
  * @properties={typeid:24,uuid:"136EC738-6A7A-401D-92E9-767FA8018397"}
  */
 function btnBuyTrial(event) {
-	session.trackEvent(controller.getName(), 'ProductA', null, 'click', 'Buy', 'Trial', 'FREE')
+	session.trackEvent(controller.getName(), 'LayoutA', null, 'Buy-A', 'Trial', 'Buy Product A Trial', 'FREE')
 	purchased = OFFERS.TRIAL
 	refreshUI()
 }
@@ -64,7 +64,7 @@ function btnBuyTrial(event) {
  * @properties={typeid:24,uuid:"F044271D-1421-4BCF-B056-117C80BCFDC3"}
  */
 function btnBuyPremium(event) {
-	session.trackEvent(controller.getName(), 'ProductA', null, 'click', 'Buy', 'Premium', '50')
+	session.trackEvent(controller.getName(), 'LayoutA', null, 'Buy-A', 'Premium', 'Buy Product A Premium', '50')
 	purchased = OFFERS.PREMIUM
 	refreshUI()
 }
@@ -79,7 +79,7 @@ function btnBuyPremium(event) {
  * @properties={typeid:24,uuid:"2F1B0C98-4BC5-4192-9012-F36487F06B7C"}
  */
 function btnBuyEnterprise(event) {
-	session.trackEvent(controller.getName(), 'ProductA', null, 'click', 'Buy', 'Enterprise', '100')
+	session.trackEvent(controller.getName(), 'LayoutA', null, 'Buy-A', 'Enterprise', 'Buy Product A Enterprise', '100')
 	purchased = OFFERS.ENTERPRISE
 	refreshUI()
 }
@@ -94,7 +94,7 @@ function btnBuyEnterprise(event) {
  * @properties={typeid:24,uuid:"CEB58228-ED9F-48D3-8BB7-71F3ADB2D61B"}
  */
 function btnShowHome(event) {
-	forms.main.showPage(forms.main.PAGES.HOME)
+	forms.layoutA.showPage(forms.layoutA.PAGES.HOME)
 }
 
 /**
@@ -107,7 +107,7 @@ function btnShowHome(event) {
  * @properties={typeid:24,uuid:"29230A15-56E5-4CB2-B01E-D9F6CFCD50E7"}
  */
 function btnShowProductB(event) {
-	forms.main.showPage(forms.main.PAGES.PRODUCT_B)
+	forms.layoutA.showPage(forms.layoutA.PAGES.PRODUCT_B)
 }
 
 /**

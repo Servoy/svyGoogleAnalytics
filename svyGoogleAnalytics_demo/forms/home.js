@@ -18,7 +18,7 @@ var session = scopes.svyGoogleAnalytics.getClientSession()
  */
 function onShow(firstShow, event) {
 	// Track the page at onShow
-	session.trackPageView(controller.getName(), 'Home menu', null)
+	session.trackPageView(controller.getName(), 'Layout A Home', null)
 }
 
 /**
@@ -31,7 +31,7 @@ function onShow(firstShow, event) {
  * @properties={typeid:24,uuid:"DE3A09D0-6FCF-4B14-A897-807A318D5E66"}
  */
 function showProductA(event) {
-	forms.main.showPage(forms.main.PAGES.PRODUCT_A)
+	forms.layoutA.showPage(forms.layoutA.PAGES.PRODUCT_A)
 }
 
 /**
@@ -44,6 +44,6 @@ function showProductA(event) {
  * @properties={typeid:24,uuid:"97F05B6D-FC7F-4708-8897-4EDFA3A4C212"}
  */
 function shotProductB(event) {
-	forms.main.showPage(forms.main.PAGES.PRODUCT_B)
+	forms.layoutA.showPage(forms.layoutA.PAGES.PRODUCT_B)
 }
 
