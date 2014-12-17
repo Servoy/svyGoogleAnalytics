@@ -1,3 +1,4 @@
+borderType:"EmptyBorder,0,0,0,0",
 encapsulation:60,
 items:[
 {
@@ -17,7 +18,8 @@ size:"5,643",
 text:"",
 transparent:true,
 typeid:7,
-uuid:"154180E5-1DFE-47F1-8F25-B9F9012221A8"
+uuid:"154180E5-1DFE-47F1-8F25-B9F9012221A8",
+visible:false
 },
 {
 background:"#3498db",

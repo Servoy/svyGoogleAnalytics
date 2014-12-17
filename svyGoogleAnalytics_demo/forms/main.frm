@@ -11,10 +11,10 @@ uuid:"15FE370F-E0B3-4B69-BD0A-FC366915F57F"
 anchors:15,
 background:"#ffffff",
 borderType:"LineBorder,1,#ffffff",
-location:"26,151",
+location:"26,192",
 name:"tabless",
 printable:false,
-size:"759,502",
+size:"759,461",
 tabOrientation:-1,
 transparent:true,
 typeid:16,
@@ -36,6 +36,15 @@ text:"Google Analytics",
 transparent:true,
 typeid:7,
 uuid:"5DC617C4-54E4-4F23-B3F9-003EC63E4EC6"
+},
+{
+location:"26,137",
+size:"649,50",
+text:"<html>Present two different menu layout at different user, randomly. Use Google Analytics to analyze ther User behavior. Does the Layout B received more clicks on the purchase items then Layout B ?<\/html>",
+transparent:true,
+typeid:7,
+uuid:"716AE210-DD94-4A8D-B318-07A7BADB76DB",
+verticalAlignment:1
 }
 ],
 name:"main",

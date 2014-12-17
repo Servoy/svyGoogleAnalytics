@@ -1,3 +1,4 @@
+borderType:"EmptyBorder,0,0,0,0",
 encapsulation:60,
 items:[
 {
