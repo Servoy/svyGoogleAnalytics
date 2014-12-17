@@ -261,8 +261,8 @@ function GASession(code){
 	/**
 	 * Sends a page view request to GA using the current session information and the supplied parameters
 	 * 
-	 * @param {String} pageTitle The name of the page
-	 * @param {String} pageRequest The requested URL (ideally the full form context)
+	 * @param {String} pageTitle The name of the page for tracking page views
+	 * @param {String} pageRequest The requested URL (ideally showing the solutionName concatenated to the formName or form context)
 	 * @param {String} [referral] The referring URL if any
 	 * @return {Boolean}
 	 * @public 
@@ -283,7 +283,7 @@ function GASession(code){
 	 * TODO: EXPERIMENTAL. Hadn't been reviewd to see if results are meaningful
 	 * TODO: Add meaningful categories & labels to request
 	 * 
-	 * @public 
+	 * @private 
 	 * @param {JSEvent} event
 	 */
 	this.trackEventUI = function(event){
@@ -297,12 +297,12 @@ function GASession(code){
 	
 	/**
 	 * Sends an event-tracking request to GA using the current session information and the supplied parameters
-	 * @param {String} pageTitle The name of the page
-	 * @param {String} pageRequest The requested URL (ideally the full form context)
+	 * @param {String} pageTitle The name of the page for tracking page views
+	 * @param {String} pageRequest The requested URL (ideally showing the solutionName concatenated to the formName or form context)
 	 * @param {String} referral The referring URL if any
-	 * @param {String} category The category of the event
-	 * @param {String} action The event's action
-	 * @param {String} label The label for the event
+	 * @param {String} category The category assigned to an event (e.g., Report or Downloads)
+	 * @param {String} action The action assigned to an event (e.g., Play, Download file)
+	 * @param {String} label The label assigned to an event (any descriptive string you choose)
 	 * @param {String} value Event data
 	 * @public 
 	 */
@@ -351,14 +351,14 @@ function GATrackingRequest(gaSession){
 	
 	/**
 	 * Category used for event requests
-	 * The category assigned to an event (e.g., Videos or Downloads)
+	 * The category assigned to an event (e.g., Report or Downloads)
 	 * @type {String}
 	 */
 	this.eventCategory = null;
 	
 	/**
 	 * Action used for event requests
-	 * The action assigned to an event (e.g., Play, Download Whitepaper)
+	 * The action assigned to an event (e.g., Play, Download file)
 	 * @type {String}
 	 */
 	this.eventAction = null;
@@ -371,7 +371,6 @@ function GATrackingRequest(gaSession){
 	this.eventLabel = null;
 		
 	/**
-	 * TODO deprecated ? chek custom values
 	 * Value used for event requests
 	 * @type {String}
 	 */
@@ -410,7 +409,10 @@ function GATrackingRequest(gaSession){
 	this.referral = null;
 	
 	/**
-	 * The requested URL (ideally showing form context)
+	 * The requested URL (ideally showing the solutionName concatenated to the formName or form context)
+	 * 
+	 * @example application.getSolutionName() + '/' + controller.formName
+	 * 
 	 * @type {String}
 	 */
 	this.pageRequest = null;
