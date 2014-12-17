@@ -13,6 +13,22 @@ var session = scopes.svyGoogleAnalytics.getClientSession()
 var purchased
 
 /**
+ * Get LayoutA pageTitle
+ * @type {String}
+ *
+ * @properties={typeid:35,uuid:"A35BD9F1-8DD7-4EDA-BE91-7EF0236D24A7"}
+ */
+var pageTitle = forms.layoutA.pageTitle
+
+/**
+ * Use the full context path as pageRequest URL
+ * @type {String}
+ *
+ * @properties={typeid:35,uuid:"2E855EED-578B-45AF-B091-A01C0B48BF96"}
+ */
+var pageRequest =  forms.layoutA.pageRequest + '/ProductA'
+
+/**
  * @enum
  *
  * @properties={typeid:35,uuid:"A7C82A5E-5598-4B7B-AFA1-01C75FB9AC4B",variableType:-4}
@@ -35,7 +51,7 @@ var OFFERS = {
  */
 function onShow(firstShow, event) {
 	// Track GA at page onShow
-	session.trackPageView(controller.getName(), 'ProductA', null)
+	session.trackPageView(pageTitle, pageRequest)
 	refreshUI()
 }
 
@@ -49,7 +65,7 @@ function onShow(firstShow, event) {
  * @properties={typeid:24,uuid:"136EC738-6A7A-401D-92E9-767FA8018397"}
  */
 function btnBuyTrial(event) {
-	session.trackEvent(controller.getName(), 'LayoutA', null, 'Buy-A', 'Trial', 'Buy Product A Trial', 'FREE')
+	session.trackEvent(pageTitle, pageRequest, null, 'Buy-A', 'Trial', 'Buy Product A Trial', 'FREE')
 	purchased = OFFERS.TRIAL
 	refreshUI()
 }
@@ -64,7 +80,7 @@ function btnBuyTrial(event) {
  * @properties={typeid:24,uuid:"F044271D-1421-4BCF-B056-117C80BCFDC3"}
  */
 function btnBuyPremium(event) {
-	session.trackEvent(controller.getName(), 'LayoutA', null, 'Buy-A', 'Premium', 'Buy Product A Premium', '50')
+	session.trackEvent(pageTitle, pageRequest, null, 'Buy-A', 'Premium', 'Buy Product A Premium', '50')
 	purchased = OFFERS.PREMIUM
 	refreshUI()
 }
@@ -79,7 +95,7 @@ function btnBuyPremium(event) {
  * @properties={typeid:24,uuid:"2F1B0C98-4BC5-4192-9012-F36487F06B7C"}
  */
 function btnBuyEnterprise(event) {
-	session.trackEvent(controller.getName(), 'LayoutA', null, 'Buy-A', 'Enterprise', 'Buy Product A Enterprise', '100')
+	session.trackEvent(pageTitle, pageRequest, null, 'Buy-A', 'Enterprise', 'Buy Product A Enterprise', '100')
 	purchased = OFFERS.ENTERPRISE
 	refreshUI()
 }

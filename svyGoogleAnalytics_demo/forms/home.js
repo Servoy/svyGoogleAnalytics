@@ -5,6 +5,19 @@
  */
 var session = scopes.svyGoogleAnalytics.getClientSession()
 
+/**
+ * @type {String}
+ *
+ * @properties={typeid:35,uuid:"3BB7532D-B597-46AC-844F-568AA4D797A4"}
+ */
+var pageTitle = forms.layoutA.pageTitle
+
+/**
+ * @type {String}
+ *
+ * @properties={typeid:35,uuid:"14BA87F2-02BC-4D0D-B875-AD1A6738006A"}
+ */
+var pageRequest =  forms.layoutA.pageRequest + '/Home';
 
 /**
  * Callback method for when form is shown.
@@ -18,7 +31,7 @@ var session = scopes.svyGoogleAnalytics.getClientSession()
  */
 function onShow(firstShow, event) {
 	// Track the page at onShow
-	session.trackPageView(controller.getName(), 'Layout A Home', null)
+	session.trackPageView(pageTitle, pageRequest)
 }
 
 /**

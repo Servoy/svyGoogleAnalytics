@@ -6,6 +6,22 @@
 var session = scopes.svyGoogleAnalytics.getClientSession();
 
 /**
+ * @type {String}
+ * @public 
+ *
+ * @properties={typeid:35,uuid:"F38110FB-5EAC-41BE-992C-DFA4050E0755"}
+ */
+var pageTitle = 'LayoutA'
+
+/**
+ * @type {String}
+ * @public 
+ *
+ * @properties={typeid:35,uuid:"E0AB2B13-39E6-4F94-9548-0E87E911C441"}
+ */
+var pageRequest =  application.getSolutionName() + '/' + pageTitle;
+
+/**
  * @enum 
  * @public 
  * 
@@ -29,7 +45,7 @@ var PAGES = {
  */
 function onShow(firstShow, event) {
 	// Track the page at onShow
-	session.trackPageView(controller.getName(), 'Layout A', null)
+	session.trackPageView(pageTitle, pageRequest)
 }
 
 /**
