@@ -283,7 +283,7 @@ function GASession(code){
 	 * TODO: EXPERIMENTAL. Hadn't been reviewd to see if results are meaningful
 	 * TODO: Add meaningful categories & labels to request
 	 * 
-	 * @private 
+	 * @public  
 	 * @param {JSEvent} event
 	 */
 	this.trackEventUI = function(event){
