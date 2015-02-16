@@ -283,7 +283,7 @@ function GASession(code){
 	 * TODO: EXPERIMENTAL. Hadn't been reviewd to see if results are meaningful
 	 * TODO: Add meaningful categories & labels to request
 	 * 
-	 * @private 
+	 * @protected    
 	 * @param {JSEvent} event
 	 */
 	this.trackEventUI = function(event){
@@ -483,6 +483,7 @@ function GATrackingRequest(gaSession){
 }
 
 
+
 /**
  * Initializes the current session object for the running client instance
  * Attempts to load persistent session data from user properties. Resumes session if found.
@@ -664,7 +665,9 @@ function generateUAString() {
 						'5.2': 'Windows NT 5.2', //Windows Servoy 2003; Windows P x64 Edition
 						'6.0': 'Windows NT 6.0', //Windows Vista
 						'6.1': 'Windows NT 6.1', //Windows 7
-						'6.2': 'Windows NT 6.2' //windows 8 Release Preview	
+						'6.2': 'Windows NT 6.2', //windows 8 / Windows Server 2012 R2		
+						'6.3': 'Windows NT 6.3', //windows 8.1 / Windows Server 2012 R2	
+						'6.4': 'Windows NT 6.4' //windows 10
 					}
 					if (!versions[Packages.java.lang.System.getProperty('os.version')]) {
 						//TODO: log
