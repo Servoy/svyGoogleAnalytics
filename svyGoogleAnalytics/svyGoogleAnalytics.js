@@ -358,7 +358,7 @@ function GATrackingRequest(gaSession){
 	
 	/**
 	 * Action used for event requests
-	 * The action assigned to an event (e.g., Play, Download file)
+	 * The action assigned to an event (e.g., View file, Download file)
 	 * @type {String}
 	 */
 	this.eventAction = null;
@@ -438,19 +438,26 @@ function GATrackingRequest(gaSession){
 			props.utmip = ipAddress;
 		}
 		
+		// encode parameters
 		var params = [];
 		for (var p in props) {
 			if (props[p]) {
-				params.push(p + '=' + Packages.java.net.URLEncoder.encode(props[p])); //CHECKME: why using inline Java here for enconding and not JavaScript encodeURI(Component)?
+				params.push(p + '=' + encodeParam(props[p])); //CHECKME: why using inline Java here for enconding and not JavaScript encodeURI(Component)?
 			}
 		}
+		
+		// event parameters
 		if (this.requestType == GA_REQUEST_TYPES.EVENT && this.eventCategory && this.eventAction) {
-			var evt = [this.eventCategory, this.eventAction]
-			if (this.eventLabel)evt.push(this.eventLabel);
-			if (this.eventValue)evt.push(this.eventValue);
+			var evt = [encodeParam(this.eventCategory), encodeParam(this.eventAction)]
+			if (this.eventLabel)evt.push(encodeParam(this.eventLabel));
+			if (this.eventValue)evt.push(encodeParam(this.eventValue));
 			params.push('utme=5(' + evt.join('*') + ')');
 		}
 		return params.join('&');
+		
+		function encodeParam(param) {
+			return Packages.java.net.URLEncoder.encode(param)
+		}
 	}
 	
 	/**

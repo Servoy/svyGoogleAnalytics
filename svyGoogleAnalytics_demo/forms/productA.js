@@ -65,7 +65,7 @@ function onShow(firstShow, event) {
  * @properties={typeid:24,uuid:"136EC738-6A7A-401D-92E9-767FA8018397"}
  */
 function btnBuyTrial(event) {
-	session.trackEvent(pageTitle, pageRequest, null, 'Buy-A', 'Trial', 'Buy Product A Trial', 'FREE')
+	session.trackEvent(pageTitle, pageRequest, null, 'Buy', 'Product A', 'Trial', 'FREE')
 	purchased = OFFERS.TRIAL
 	refreshUI()
 }
@@ -80,7 +80,7 @@ function btnBuyTrial(event) {
  * @properties={typeid:24,uuid:"F044271D-1421-4BCF-B056-117C80BCFDC3"}
  */
 function btnBuyPremium(event) {
-	session.trackEvent(pageTitle, pageRequest, null, 'Buy-A', 'Premium', 'Buy Product A Premium', '50')
+	session.trackEvent(pageTitle, pageRequest, null, 'Buy', 'Product A', 'Premium', '50')
 	purchased = OFFERS.PREMIUM
 	refreshUI()
 }
@@ -95,7 +95,7 @@ function btnBuyPremium(event) {
  * @properties={typeid:24,uuid:"2F1B0C98-4BC5-4192-9012-F36487F06B7C"}
  */
 function btnBuyEnterprise(event) {
-	session.trackEvent(pageTitle, pageRequest, null, 'Buy-A', 'Enterprise', 'Buy Product A Enterprise', '100')
+	session.trackEvent(pageTitle, pageRequest, null, 'Buy', 'Product A', 'Enterprise', '100')
 	purchased = OFFERS.ENTERPRISE
 	refreshUI()
 }
