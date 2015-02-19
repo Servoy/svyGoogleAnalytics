@@ -4,6 +4,11 @@ svyGoogleAnalytics
 GoogleAnalytics component for Servoy clients
 
 
+Webinar
+-------------
+See the [Google Analytics Webinar](https://www.youtube.com/watch?v=R7SaMcyRMZ8) from the Servoy [Youtube Channel](https://www.youtube.com/channel/UCbjdSIpNefkKFQZ6TfdymBA)
+
+
 Getting started
 -------------
 To use the svyGoogleAnalytics module download the [svyGoogleAnalytics.zip](https://github.com/Servoy/svyGoogleAnalytics/releases) file extract the .servoy files and import them into your workspace. 
