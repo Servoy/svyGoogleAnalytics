@@ -32,4 +32,4 @@ Eager to fix a bug or introduce a new feature? Clone the repository and issue a 
 
 License
 -------
-svyGoogleAnalytics is licensed under LGPL
+svyGoogleAnalytics is licensed under MIT
