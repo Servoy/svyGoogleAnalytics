@@ -23,37 +23,6 @@
  * 
  */
 
-/**
- * @type {String}
- * @private
- *
- * @properties={typeid:35,uuid:"40DEAB1D-3F4D-4A39-AF13-96060D2C7365"}
- */
-var SOLUTION_NAME = 'svyGoogleAnalytics';
-
-/**
- * @type {String}
- * @private
- * @properties={typeid:35,uuid:"A37E497C-440A-4840-BB47-332D9BB2F65F"}
- */
-var REMOTE_CLIENT_ID = '00000000-0000-0000-0000-00GANALYTICS';
-
-/**
- * @type {String}
- * @private 
- *
- * @properties={typeid:35,uuid:"0804955C-60AB-4C6B-9FBA-B7B0AD0C1C48"}
- */
-var remoteUserName;
-
-/**
- * @type {String}
- * @private 
- *
- * @properties={typeid:35,uuid:"D3153FFF-4240-4E78-8317-7CBCE429279E"}
- */
-var remoteUserPassword;
-
 
 /**
  * Base URL for GA HTTP service
@@ -90,14 +59,6 @@ var GA_REQUEST_TYPES = {
  * @properties={typeid:35,uuid:"4D0E2DB3-A30C-4E29-9FCE-E5D2C35EA2EF",variableType:-4}
  */
 var clientSession;
-
-/**
- * Callback placeholder for tracking requests
- * @type {Function}
- * @private 
- * @properties={typeid:35,uuid:"AADE4424-60B0-4C1F-8D37-B82C21C59DF8",variableType:-4}
- */
-var requestCallback;
 
 /**
  * The standard prefix for a tracking code
@@ -213,6 +174,65 @@ function GASession(code){
 		}
 		return retval.toFixed(0) + '-bit'
 	}();
+	
+	this.generateUAString = function() {
+		var uaString;
+		switch (application.getApplicationType()) {
+			case APPLICATION_TYPES.NG_CLIENT:
+				uaString = plugins.ngclientutils.getUserAgent();
+				break;
+			case APPLICATION_TYPES.WEB_CLIENT:
+				/** @type {Packages.org.apache.wicket.protocol.http.request.WebClientInfo}*/
+				var info = Packages.org.apache.wicket.RequestCycle.get().getClientInfo()
+				uaString = info.getUserAgent()
+				break;
+			case APPLICATION_TYPES.HEADLESS_CLIENT: //Intentional fall-through
+			case APPLICATION_TYPES.RUNTIME_CLIENT: //Intentional fall-through
+			case APPLICATION_TYPES.SMART_CLIENT:
+				uaString = 'Java/' + Packages.java.lang.System.getProperty("java.version")
+				uaString += ' (' 
+				var os = application.getOSName().toLowerCase()
+				var platform = os.indexOf('win') != -1 ? 'win' : os.indexOf('mac') != -1 ? 'mac' : 'linux'
+				switch (platform) {
+					case 'win':
+						var versions = {
+							'4.0': '',
+							'4.10': '',
+							'4.90': '',
+							'5.0': 'Windows NT 5.0', //Windows 2000
+							'5.01': 'Windows NT 5.01', //Windows 200, Service Pack 1 (SP1)
+							'5.1': 'Windows NT 5.1', //Windows XP
+							'5.2': 'Windows NT 5.2', //Windows Servoy 2003; Windows P x64 Edition
+							'6.0': 'Windows NT 6.0', //Windows Vista
+							'6.1': 'Windows NT 6.1', //Windows 7
+							'6.2': 'Windows NT 6.2', //windows 8 / Windows Server 2012 R2		
+							'6.3': 'Windows NT 6.3', //windows 8.1 / Windows Server 2012 R2	
+							'6.4': 'Windows NT 6.4' //windows 10
+						}
+						if (!versions[Packages.java.lang.System.getProperty('os.version')]) {
+							//TODO: log
+						} else {
+							uaString += versions[Packages.java.lang.System.getProperty('os.version')]
+						}
+						if (Packages.java.lang.System.getProperty("os.arch").indexOf('64') && true) {
+							uaString += '; WOW64'
+						}
+						break;
+					case 'mac':
+						uaString += 'Macintosh'
+						break
+					case 'linux':
+						uaString += 'X11;'
+						break
+					default:
+						break;
+				}	
+				uaString += ')'
+				uaString += ' Servoy/' + application.getVersion()
+				break;
+		}
+		return uaString
+	}();
 		
 	/**
 	 * Language of client
@@ -220,6 +240,12 @@ function GASession(code){
 	 * @type {String}
 	 */
 	this.language = i18n.getCurrentLanguage();
+	
+	/**
+	 * The country from which the data originated.
+	 * @type {String}
+	 */
+	this.country = i18n.getCurrentCountry();
 	
 	/**
 	 * Java Enabled (Always 1)
@@ -261,11 +287,12 @@ function GASession(code){
 			utmul:this.language,
 			utmje:this.javaEnabled,
 			utmfl:this.servoyVerion,
+			utmtco:this.country,
 			utmac:utils.stringReplace(this.trackingCode,UA_TRACKING_PREFIX,MO_TRACKING_PREFIX),	// Replace with MO prefix to ensure client IP is located
 			utmcc:'__utma='+new Array(this.hostNameHash,this.visitorID,this.firstVisit,this.previousVisit,this.currentVisit,this.sessionCount).join('.')
 		};
 		var params = []; 
-		for(var p in props) if(props[p]) params.push(p + '=' + Packages.java.net.URLEncoder.encode(props[p]));
+		for(var p in props) if(props[p]) params.push(p + '=' + Packages.java.net.URLEncoder.encode(props[p], java.nio.charset.StandardCharsets.UTF_8.toString()));
 		return params.join('&');
 	}
 
@@ -305,7 +332,7 @@ function GASession(code){
 	 * This is a convenience method to track a component actions implicitly.
 	 * It is equivalent to calling trackEvent and supplying component information directly
 	 * 
-	 * TODO: EXPERIMENTAL. Hadn't been reviewd to see if results are meaningful
+	 * TODO: EXPERIMENTAL. Hadn't been reviewed to see if results are meaningful
 	 * TODO: Add meaningful categories & labels to request
 	 * 
 	 * @protected    
@@ -481,7 +508,7 @@ function GATrackingRequest(gaSession){
 		return params.join('&');
 		
 		function encodeParam(param) {
-			return Packages.java.net.URLEncoder.encode(param)
+			return Packages.java.net.URLEncoder.encode(param, java.nio.charset.StandardCharsets.UTF_8.toString())
 		}
 	}
 	
@@ -501,13 +528,44 @@ function GATrackingRequest(gaSession){
 	 * @public 
 	 */
 	this.execute = function(callback){
-		dispatch(this.buildURL(),callback);
+		var userAgent = this.session.generateUAString;
+		var client = plugins.http.createNewHttpClient()
+		var req = client.createGetRequest(this.buildURL());
+		
+		if (userAgent) {
+			req.addHeader("User-Agent", userAgent);
+		}
+		req.executeAsyncRequest(successCallbackMethod, errorCallbackMethod);
 	}
-	
+
 	Object.seal(this);
 }
 
+/**
+ * call back for successfull async http request
+ * 
+ * @param {plugins.http.Response} request
+ * @private  
+ *
+ * @properties={typeid:24,uuid:"D072F8BF-3197-4DA6-AEB5-1BF023C1382D"}
+ */
+function successCallbackMethod(request) {
+	request.close();
+}
 
+/**
+ * call back for error async http request
+ * 
+ * @param {plugins.http.Response} request
+ * @private  
+ *
+ * @properties={typeid:24,uuid:"335A0011-11C8-4FB1-AB4D-1D54F8D239EA"}
+ */
+function errorCallbackMethod(request) {
+	if(request) {
+		throw new scopes.svyNet.HTTPException('Failed HTTP Request', request.getStatusCode(), request.getResponseBody());
+	}
+}
 
 /**
  * Initializes the current session object for the running client instance
@@ -523,9 +581,6 @@ function initSession(trackingCode, resumeFromUserProps){
 	if (!trackingCode) {
 		throw new scopes.svyExceptions.IllegalArgumentException('Tracking code required');
 	}
-//	if (!remoteUserName || !remoteUserPassword) {
-//		throw new scopes.svyExceptions.IllegalArgumentException('Remote dispatch user is required. Call setRemoteDispatchUser first');
-//	}
 	if (clientSession) {
 		throw new scopes.svyExceptions.IllegalStateException('Session is already initialized. Call session destroy first');
 	}
@@ -588,138 +643,6 @@ function persistClientSession(){
 }
 
 /**
- * Central dispatch for all GA HTTP requests 
- * Asynchronously sends requests to a server-side queue.
- * 
- * @param {String} url
- * @param {Function} [callback]
- * @private
- * @properties={typeid:24,uuid:"6D976D46-2F5B-41F9-AC78-BB6B6E618DF3"}
- */
-function dispatch(url, callback){
-	requestCallback = callback;
-//	var url = request.buildURL();
-	var userAgent = generateUAString();
-	
-	getHeadlessClient().queueMethod(null,'scopes.svyGoogleAnalytics.dispatchRemote', [url, userAgent], onDispatchCallback);
-}
-
-/**
- * Callback handler for GA request, delegates to callback handler if assigned
- * @param {JSEvent} event
- * @private 
- * @properties={typeid:24,uuid:"D57C559D-6691-4401-8612-8C94EC9D48E5"}
- */
-function onDispatchCallback(event){
-	if(event.getType() != plugins.headlessclient.JSClient.CALLBACK_EVENT){
-		application.output('No response received for GA Tracking request',LOGGINGLEVEL.ERROR);
-	}
-	if(!requestCallback){
-		return;
-	}	
-	requestCallback.apply(this,[event.data]);
-	requestCallback = null;
-}
-
-/**
- * Remote dispatch for all GA HTTP requests
- * receives requested URLs in a server-side queue and processes sequentially
- * @param {String} url
- * @param {String} [userAgent]
- * @private
- * @properties={typeid:24,uuid:"01382ADE-B92E-4C19-8B02-5484367F17EB"}
- */
-function dispatchRemote(url, userAgent){
-	var client = plugins.http.createNewHttpClient()
-	var req = client.createGetRequest(url);
-	
-	if (userAgent) {
-		req.addHeader("User-Agent", userAgent);
-	}
-	var res = req.executeRequest();
-	var code = res.getStatusCode();
-	if(code != plugins.http.HTTP_STATUS.SC_OK) throw new scopes.svyNet.HTTPException('Failed HTTP Request', code, res.getResponseBody());
-	return code;
-}
-
-/**
- * First draft of generating proper User Agent strings from which Google Analytics can get the relevant information
- * The User Agent strings are custom only for Smart, Headless and Runtime client. For Web Client the actual browser User Agent string is forwarded.
- * 
- * Implementation is far form complete. Much of the info used by browsers to generate US Strings seems unavailable in Java. Need to figure out how to improve this
- * 
- * For more info on User Agent Strings, see:
- * - http://en.wikipedia.org/wiki/User_agent
- * - http://www.texsoft.it/index.php?c=software&m=sw.php.useragent&l=it
- * - http://lopica.sourceforge.net/os.html
- * - http://www.useragentstring.com/pages/Chrome/
- * - http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
- * 
- * TODO improve platform/os info in UA String 
- * TODO append relevant Servoy info to Web Client US String
- * TODO somehow differentiate between Smart, Headless and runtime Client in the UA String
- * 
- * @private
- * @return {String}
- * @properties={typeid:24,uuid:"C1D52EAF-FFDD-4812-9186-7234FCBDA45B"}
- */
-function generateUAString() {
-	var uaString;
-	switch (application.getApplicationType()) {
-		case APPLICATION_TYPES.WEB_CLIENT:
-			/** @type {Packages.org.apache.wicket.protocol.http.request.WebClientInfo}*/
-			var info = Packages.org.apache.wicket.RequestCycle.get().getClientInfo()
-			uaString = info.getUserAgent()
-			break;
-		case APPLICATION_TYPES.HEADLESS_CLIENT: //Intentional fall-through
-		case APPLICATION_TYPES.RUNTIME_CLIENT: //Intentional fall-through
-		case APPLICATION_TYPES.SMART_CLIENT:
-			uaString = 'Java/' + Packages.java.lang.System.getProperty("java.version")
-			uaString += ' (' 
-			var os = application.getOSName().toLowerCase()
-			var platform = os.indexOf('win') != -1 ? 'win' : os.indexOf('mac') != -1 ? 'mac' : 'linux'
-			switch (platform) {
-				case 'win':
-					var versions = {
-						'4.0': '',
-						'4.10': '',
-						'4.90': '',
-						'5.0': 'Windows NT 5.0', //Windows 2000
-						'5.01': 'Windows NT 5.01', //Windows 200, Service Pack 1 (SP1)
-						'5.1': 'Windows NT 5.1', //Windows XP
-						'5.2': 'Windows NT 5.2', //Windows Servoy 2003; Windows P x64 Edition
-						'6.0': 'Windows NT 6.0', //Windows Vista
-						'6.1': 'Windows NT 6.1', //Windows 7
-						'6.2': 'Windows NT 6.2', //windows 8 / Windows Server 2012 R2		
-						'6.3': 'Windows NT 6.3', //windows 8.1 / Windows Server 2012 R2	
-						'6.4': 'Windows NT 6.4' //windows 10
-					}
-					if (!versions[Packages.java.lang.System.getProperty('os.version')]) {
-						//TODO: log
-					} else {
-						uaString += versions[Packages.java.lang.System.getProperty('os.version')]
-					}
-					if (Packages.java.lang.System.getProperty("os.arch").indexOf('64') && true) {
-						uaString += '; WOW64'
-					}
-					break;
-				case 'mac':
-					uaString += 'Macintosh'
-					break
-				case 'linux':
-					uaString += 'X11;'
-					break
-				default:
-					break;
-			}	
-			uaString += ')'
-			uaString += ' Servoy/' + application.getVersion()
-			break;
-	}
-	return uaString
-}
-
-/**
  * TODO: Which timezone to use? UTC or Server
  * Return UNIX timestamp (sans miliseconds) required for session data
  * @private
@@ -755,43 +678,4 @@ function getHostNameHash(hostName){
 function getVisitorHash(userName){
 	var un = userName || security.getUserUID() || security.getUserName() || application.getHostName();
 	return parseInt(utils.stringMD5HashBase16(un).substr(0,8),16).toString(10);
-}
-
-/**
- * FIXME: Use Constants for client id, user name and password 
- * Create and/or get headless client instance used to queue requests
- * @private
- * @return {plugins.headlessclient.JSClient}
- * @properties={typeid:24,uuid:"6475B5E0-0356-4DBC-84CB-E5002F538B19"}
- */
-function getHeadlessClient(){
-	var client = plugins.headlessclient.getClient(REMOTE_CLIENT_ID);
-	if(!client){
-		var uid = security.getUserUID(remoteUserName);
-		if(!uid || !security.checkPassword(uid,remoteUserPassword) || security.getUserGroups(uid).getMaxRowIndex() < 1)
-			throw new scopes.svyExceptions.IllegalStateException(
-			'Failed to authenticate remote dispatch user "'+remoteUserName+'" for Google Analytics Remote Dispatch Client. '+
-			'Ensure that the account exists and has correct credentials and is valid/belongs to a valid group. '+
-			'The remote dispatch user can be configured using scopes.modGoogleAnalyics.setRemoteDispatchUser()');
-		client = plugins.headlessclient.getOrCreateClient(REMOTE_CLIENT_ID,SOLUTION_NAME,remoteUserName,remoteUserPassword,null);
-		if(!client) throw new scopes.svyExceptions.IllegalStateException('Failed to create headless client for Google Analytics Remote Dispatch. Check the server log for details');
-	}
-	if(!client.isValid()) throw new scopes.svyExceptions.IllegalStateException('Google Analytics Remote Dispatch Client exists, but is not valid');	
-	return client;
-}
-
-/**
- * Overrides the internal security user name and credentials for headless client usage
- * 
- * @public 
- * @param {String} userName
- * @param {String} password
- * 
- * @properties={typeid:24,uuid:"7471A958-90F9-4867-8AEA-7FFA8B586C92"}
- */
-function setRemoteDispatchUser(userName,password){
-	var client = plugins.headlessclient.getClient(REMOTE_CLIENT_ID);
-	if(client) throw new scopes.svyExceptions.IllegalStateException('The remote client (Client ID:'+REMOTE_CLIENT_ID+') is already started. Shutdown the client first and try again');
-	remoteUserName = userName;
-	remoteUserPassword = password;
 }
