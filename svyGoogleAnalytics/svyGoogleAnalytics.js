@@ -575,6 +575,7 @@ function errorCallbackMethod(request) {
  * @param {Boolean} [resumeFromUserProps] Attempts to resume session data from previous visits stored in user properties file
  * @see GASession.resume()
  * @properties={typeid:24,uuid:"95E85CFD-2BB1-45E9-A6FC-BE1C8D3E44D9"}
+ * @return {GASession}
  */
 function initSession(trackingCode, resumeFromUserProps){
 	
