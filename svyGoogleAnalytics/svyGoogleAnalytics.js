@@ -52,6 +52,12 @@ var GA_REQUEST_TYPES = {
 };
 
 /**
+ * @type {plugins.http.HttpClient}
+ * @properties={typeid:35,uuid:"C3AEF259-9B7E-4B2F-92B9-1603AC3D75E6",variableType:-4}
+ */
+var client = plugins.http.createNewHttpClient();
+
+/**
  * Instance of the current client session
  * Multiple client session objects can be created, but a single client session is cached for convenience as a single GA session maps to a single Servoy Client
  * @type {GASession}
@@ -529,7 +535,6 @@ function GATrackingRequest(gaSession){
 	 */
 	this.execute = function(callback){
 		var userAgent = this.session.generateUAString;
-		var client = plugins.http.createNewHttpClient()
 		var req = client.createGetRequest(this.buildURL());
 		
 		if (userAgent) {
@@ -550,9 +555,9 @@ function GATrackingRequest(gaSession){
  * @properties={typeid:24,uuid:"D072F8BF-3197-4DA6-AEB5-1BF023C1382D"}
  */
 function successCallbackMethod(request) {
-	request.close();
+	//Empty method
 }
-
+		 
 /**
  * call back for error async http request
  * 
